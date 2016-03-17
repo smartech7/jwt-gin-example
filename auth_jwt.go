@@ -57,7 +57,6 @@ type Login struct {
 
 // MiddlewareFunc makes JWTMiddleware implement the Middleware interface.
 func (mw *JWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
-	// fmt.Println("MiddlewareFunc")
 	if mw.Realm == "" {
 		log.Fatal("Realm is required")
 	}
@@ -86,7 +85,6 @@ func (mw *JWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		mw.middlewareImpl(c)
-
 		return
 	}
 }
@@ -99,7 +97,6 @@ func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
 
 	if err != nil {
 		mw.unauthorized(c, http.StatusUnauthorized, err)
-
 		return
 	}
 
@@ -139,6 +136,40 @@ func (mw *JWTMiddleware) LoginHandler(c *gin.Context) {
 	token.Claims["id"] = loginVals.Username
 	token.Claims["exp"] = expire.Unix()
 	tokenString, err := token.SignedString(mw.Key)
+
+	if err != nil {
+		mw.unauthorized(c, http.StatusUnauthorized, "Create JWT Token faild")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token":  tokenString,
+		"expire": expire.Format(time.RFC3339),
+	})
+}
+
+// RefreshHandler can be used to refresh a token. The token still needs to be valid on refresh.
+// Shall be put under an endpoint that is using the JWTMiddleware.
+// Reply will be of the form {"token": "TOKEN"}.
+func (mw *JWTMiddleware) RefreshHandler(c *gin.Context) {
+	token, err := mw.parseToken(c)
+
+	if err != nil {
+		mw.unauthorized(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	// Create the token
+	newToken := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))
+
+	for key := range token.Claims {
+		newToken.Claims[key] = token.Claims[key]
+	}
+
+	expire := time.Now().Add(mw.Timeout)
+	newToken.Claims["id"] = token.Claims["id"]
+	newToken.Claims["exp"] = expire.Unix()
+	tokenString, err := newToken.SignedString(mw.Key)
 
 	if err != nil {
 		mw.unauthorized(c, http.StatusUnauthorized, "Create JWT Token faild")

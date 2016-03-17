@@ -8,7 +8,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"log"
-	// "net/http"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -31,12 +31,6 @@ type JWTMiddleware struct {
 
 	// Duration that a jwt token is valid. Optional, defaults to one hour.
 	Timeout time.Duration
-
-	// This field allows clients to refresh their token until MaxRefresh has passed.
-	// Note that clients can refresh their token in the last moment of MaxRefresh.
-	// This means that the maximum validity timespan for a token is MaxRefresh + Timeout.
-	// Optional, defaults to 0 meaning not refreshable.
-	MaxRefresh time.Duration
 
 	// Callback function that should perform the authentication of the user based on userId and
 	// password. Must return true on success, false on failure. Required.
@@ -99,13 +93,13 @@ func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
 	token, err := mw.parseToken(c)
 
 	if err != nil {
-		mw.unauthorized(c)
+		mw.unauthorized(c, http.StatusUnauthorized, err)
+
 		return
 	}
 
 	uid := token.Claims["id"].(string)
 
-	// fmt.Println(loudshoutUsers)
 	c.Set("userID", uid)
 	c.Next()
 }
@@ -125,47 +119,45 @@ func ExtractClaims(c *gin.Context) map[string]interface{} {
 // Payload needs to be json in the form of {"username": "USERNAME", "password": "PASSWORD"}.
 // Reply will be of the form {"token": "TOKEN"}.
 func (mw *JWTMiddleware) TokenGenerator(c *gin.Context, userID string) string {
-	fmt.Println("LoginHandler")
-	// mw.SigningAlgorithm = "HS256"
-	fmt.Println(mw.SigningAlgorithm, string(mw.Key))
-
 	token := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))
-	// fmt.Println(token)
+
 	if mw.PayloadFunc != nil {
 		for key, value := range mw.PayloadFunc(userID) {
 			token.Claims[key] = value
 		}
 	}
-	// uid := userID.String()
-	// fmt.Println("userID=",uid)
+
 	token.Claims["id"] = userID
 	token.Claims["exp"] = time.Now().Add(mw.Timeout).Unix()
 
 	tokenString, err := token.SignedString(mw.Key)
 
 	if err != nil {
-		mw.unauthorized(c)
-		return "null"
+		mw.unauthorized(c, http.StatusUnauthorized, "Create JWT Token faild")
+
+		return
 	}
+
 	return tokenString
 }
 
 func (mw *JWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 	authHeader := c.Request.Header.Get("Authorization")
-	// fmt.Println(authHeader)
+
 	if authHeader == "" {
-		return nil, errors.New("Auth header empty")
+		return nil, "Auth header empty"
 	}
 
 	parts := strings.SplitN(authHeader, " ", 2)
 	if !(len(parts) == 2 && parts[0] == "Bearer") {
-		return nil, errors.New("Invalid auth header")
+		return nil, "Invalid auth header"
 	}
 
 	return jwt.Parse(parts[1], func(token *jwt.Token) (interface{}, error) {
 		if jwt.GetSigningMethod(mw.SigningAlgorithm) != token.Method {
-			return nil, errors.New("Invalid signing algorithm")
+			return nil, "Invalid signing algorithm"
 		}
+
 		return mw.Key, nil
 	})
 }
@@ -174,12 +166,14 @@ type token struct {
 	Token string `json:"token"`
 }
 
-func (mw *JWTMiddleware) unauthorized(c *gin.Context) {
-	fmt.Println("unauthorized")
-	c.Request.Header.Set("WWW-Authenticate", "JWT realm="+mw.Realm)
+func (mw *JWTMiddleware) unauthorized(c *gin.Context, code int, message string) {
+	c.Header("WWW-Authenticate", "JWT realm="+mw.Realm)
 
-	c.JSON(401, gin.H{"userMessege": "Not Authorized"})
+	c.JSON(code, gin.H{
+		"code":    code,
+		"message": message,
+	})
 	c.Abort()
+
 	return
-	// rest.Error(writer, "Not Authorized", http.StatusUnauthorized)
 }

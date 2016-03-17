@@ -55,8 +55,7 @@ type Login struct {
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
-// MiddlewareFunc makes JWTMiddleware implement the Middleware interface.
-func (mw *JWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
+func (mw *JWTMiddleware) MiddlewareInit() {
 	if mw.Realm == "" {
 		log.Fatal("Realm is required")
 	}
@@ -82,6 +81,11 @@ func (mw *JWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
 			return true
 		}
 	}
+}
+
+// MiddlewareFunc makes JWTMiddleware implement the Middleware interface.
+func (mw *JWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
+	mw.MiddlewareInit()
 
 	return func(c *gin.Context) {
 		mw.middlewareImpl(c)
@@ -96,7 +100,7 @@ func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
 	token, err := mw.parseToken(c)
 
 	if err != nil {
-		mw.unauthorized(c, http.StatusUnauthorized, err)
+		mw.unauthorized(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -107,7 +111,7 @@ func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
 		return
 	}
 
-	c.Set("JWT_PAYLOAD") = token.Claims
+	c.Set("JWT_PAYLOAD", token.Claims)
 	c.Set("userID", id)
 	c.Next()
 }
@@ -119,7 +123,7 @@ func (mw *JWTMiddleware) LoginHandler(c *gin.Context) {
 
 	var loginVals Login
 
-	if c.BindJSON(&form) != nil {
+	if c.BindJSON(&loginVals) != nil {
 		mw.unauthorized(c, http.StatusBadRequest, "Missing usename or password")
 		return
 	}
@@ -148,6 +152,7 @@ func (mw *JWTMiddleware) LoginHandler(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(http.StatusOK)
 	c.JSON(http.StatusOK, gin.H{
 		"token":  tokenString,
 		"expire": expire.Format(time.RFC3339),
@@ -161,7 +166,7 @@ func (mw *JWTMiddleware) RefreshHandler(c *gin.Context) {
 	token, err := mw.parseToken(c)
 
 	if err != nil {
-		mw.unauthorized(c, http.StatusUnauthorized, err)
+		mw.unauthorized(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -191,7 +196,7 @@ func (mw *JWTMiddleware) RefreshHandler(c *gin.Context) {
 // Helper function to extract the JWT claims
 func ExtractClaims(c *gin.Context) map[string]interface{} {
 
-	if val, exists := c.Get("JWT_PAYLOAD"); !exists {
+	if _, exists := c.Get("JWT_PAYLOAD"); !exists {
 		empty_claims := make(map[string]interface{})
 		return empty_claims
 	}
@@ -220,8 +225,7 @@ func (mw *JWTMiddleware) TokenGenerator(c *gin.Context, userID string) string {
 
 	if err != nil {
 		mw.unauthorized(c, http.StatusUnauthorized, "Create JWT Token faild")
-
-		return
+		return "null"
 	}
 
 	return tokenString
@@ -231,17 +235,17 @@ func (mw *JWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 	authHeader := c.Request.Header.Get("Authorization")
 
 	if authHeader == "" {
-		return nil, "Auth header empty"
+		return nil, errors.New("Auth header empty")
 	}
 
 	parts := strings.SplitN(authHeader, " ", 2)
 	if !(len(parts) == 2 && parts[0] == "Bearer") {
-		return nil, "Invalid auth header"
+		return nil, errors.New("Invalid auth header")
 	}
 
 	return jwt.Parse(parts[1], func(token *jwt.Token) (interface{}, error) {
 		if jwt.GetSigningMethod(mw.SigningAlgorithm) != token.Method {
-			return nil, "Invalid signing algorithm"
+			return nil, errors.New("Invalid signing algorithm")
 		}
 
 		return mw.Key, nil

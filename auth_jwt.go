@@ -102,6 +102,13 @@ func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
 
 	uid := token.Claims["id"].(string)
 
+	if !mw.Authorizator(uid, c) {
+		mw.unauthorized(c, http.StatusForbidden, "You don't have permission to access.")
+		return
+	}
+
+	uid := token.Claims["id"].(string)
+
 	c.Set("userID", uid)
 	c.Next()
 }

@@ -121,6 +121,9 @@ func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
 // Reply will be of the form {"token": "TOKEN"}.
 func (mw *JWTMiddleware) LoginHandler(c *gin.Context) {
 
+	// Initial middleware default setting.
+	mw.MiddlewareInit()
+
 	var loginVals Login
 
 	if c.BindJSON(&loginVals) != nil {

@@ -43,7 +43,6 @@ func TestLoginHandler(t *testing.T) {
 			return true
 		},
 	}
-	authMiddleware.MiddlewareInit()
 
 	gin.SetMode(gin.TestMode)
 	r := gin.New()

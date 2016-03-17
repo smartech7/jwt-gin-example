@@ -50,6 +50,11 @@ type JWTMiddleware struct {
 	PayloadFunc func(userId string) map[string]interface{}
 }
 
+type Login struct {
+	Username string `form:"username" json:"username" binding:"required"`
+	Password string `form:"password" json:"password" binding:"required"`
+}
+
 // MiddlewareFunc makes JWTMiddleware implement the Middleware interface.
 func (mw *JWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
 	// fmt.Println("MiddlewareFunc")
@@ -102,6 +107,48 @@ func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
 
 	c.Set("userID", uid)
 	c.Next()
+}
+
+// LoginHandler can be used by clients to get a jwt token.
+// Payload needs to be json in the form of {"username": "USERNAME", "password": "PASSWORD"}.
+// Reply will be of the form {"token": "TOKEN"}.
+func (mw *JWTMiddleware) LoginHandler(c *gin.Context) {
+
+	var loginVals Login
+
+	if c.BindJSON(&form) != nil {
+		mw.unauthorized(c, http.StatusBadRequest, "Missing usename or password")
+		return
+	}
+
+	if !mw.Authenticator(loginVals.Username, loginVals.Password) {
+		mw.unauthorized(c, http.StatusUnauthorized, "Incorrect Username / Password")
+		return
+	}
+
+	// Create the token
+	token := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))
+
+	if mw.PayloadFunc != nil {
+		for key, value := range mw.PayloadFunc(loginVals.Username) {
+			token.Claims[key] = value
+		}
+	}
+
+	expire := time.Now().Add(mw.Timeout)
+	token.Claims["id"] = loginVals.Username
+	token.Claims["exp"] = expire.Unix()
+	tokenString, err := token.SignedString(mw.Key)
+
+	if err != nil {
+		mw.unauthorized(c, http.StatusUnauthorized, "Create JWT Token faild")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token":  tokenString,
+		"expire": expire.Format(time.RFC3339),
+	})
 }
 
 // Helper function to extract the JWT claims
@@ -160,10 +207,6 @@ func (mw *JWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 
 		return mw.Key, nil
 	})
-}
-
-type token struct {
-	Token string `json:"token"`
 }
 
 func (mw *JWTMiddleware) unauthorized(c *gin.Context, code int, message string) {

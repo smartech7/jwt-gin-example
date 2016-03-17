@@ -100,16 +100,15 @@ func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
 		return
 	}
 
-	uid := token.Claims["id"].(string)
+	id := token.Claims["id"].(string)
 
-	if !mw.Authorizator(uid, c) {
+	if !mw.Authorizator(id, c) {
 		mw.unauthorized(c, http.StatusForbidden, "You don't have permission to access.")
 		return
 	}
 
-	uid := token.Claims["id"].(string)
-
-	c.Set("userID", uid)
+	c.Set("JWT_PAYLOAD") = token.Claims
+	c.Set("userID", id)
 	c.Next()
 }
 
@@ -191,12 +190,14 @@ func (mw *JWTMiddleware) RefreshHandler(c *gin.Context) {
 
 // Helper function to extract the JWT claims
 func ExtractClaims(c *gin.Context) map[string]interface{} {
-	fmt.Println("ExtractClaims")
-	if val, _ := c.Get("JWT_PAYLOAD"); val == nil {
+
+	if val, exists := c.Get("JWT_PAYLOAD"); !exists {
 		empty_claims := make(map[string]interface{})
 		return empty_claims
 	}
+
 	jwt_claims, _ := c.Get("JWT_PAYLOAD")
+
 	return jwt_claims.(map[string]interface{})
 }
 

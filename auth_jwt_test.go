@@ -1,4 +1,4 @@
-package JWT_MIDDLEWARE
+package jwt
 
 import (
 	"encoding/json"
@@ -236,10 +236,10 @@ func TestClaimsDuringAuthorization(t *testing.T) {
 			return false
 		},
 		Authorizator: func(userId string, c *gin.Context) bool {
-			jwt_claims := ExtractClaims(c)
+			jwtClaims := ExtractClaims(c)
 
 			// Check the actual claim, set in PayloadFunc
-			return (jwt_claims["testkey"] == "testval")
+			return (jwtClaims["testkey"] == "testval")
 		},
 	}
 

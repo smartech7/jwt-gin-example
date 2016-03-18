@@ -1,6 +1,4 @@
-// Package jwt provides Json-Web-Token authentication for the gin framework
-// fork from https://github.com/StephanDollberg/go-json-rest-middleware-jwt
-package JWT_MIDDLEWARE
+package jwt
 
 import (
 	"errors"
@@ -49,11 +47,13 @@ type JWTMiddleware struct {
 	PayloadFunc func(userId string) map[string]interface{}
 }
 
+// Login form structure.
 type Login struct {
 	Username string `form:"username" json:"username" binding:"required"`
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
+// MiddlewareInit initialize jwt configs.
 func (mw *JWTMiddleware) MiddlewareInit() {
 	if mw.Realm == "" {
 		log.Fatal("Realm is required")
@@ -191,20 +191,20 @@ func (mw *JWTMiddleware) RefreshHandler(c *gin.Context) {
 	})
 }
 
-// Helper function to extract the JWT claims
+// ExtractClaims help to extract the JWT claims
 func ExtractClaims(c *gin.Context) map[string]interface{} {
 
 	if _, exists := c.Get("JWT_PAYLOAD"); !exists {
-		empty_claims := make(map[string]interface{})
-		return empty_claims
+		emptyClaims := make(map[string]interface{})
+		return emptyClaims
 	}
 
-	jwt_claims, _ := c.Get("JWT_PAYLOAD")
+	jwtClaims, _ := c.Get("JWT_PAYLOAD")
 
-	return jwt_claims.(map[string]interface{})
+	return jwtClaims.(map[string]interface{})
 }
 
-// Handler that clients can use to get a jwt token.
+// TokenGenerator handler that clients can use to get a jwt token.
 func (mw *JWTMiddleware) TokenGenerator(userID string) string {
 	token := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))
 

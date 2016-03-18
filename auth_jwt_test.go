@@ -2,17 +2,16 @@ package JWT_MIDDLEWARE
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"github.com/appleboy/gin-jwt-server/tests"
-	"github.com/stretchr/testify/assert"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 )
-
 
 var (
 	key = []byte("secret key")
@@ -33,7 +32,7 @@ func makeTokenString(SigningAlgorithm string, username string) string {
 
 func HelloHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
-		"text":         "Hello World.",
+		"text": "Hello World.",
 	})
 }
 
@@ -41,9 +40,9 @@ func TestLoginHandler(t *testing.T) {
 
 	// the middleware to test
 	authMiddleware := &JWTMiddleware{
-		Realm:      "test zone",
-		Key:        key,
-		Timeout:    time.Hour,
+		Realm:   "test zone",
+		Key:     key,
+		Timeout: time.Hour,
 		Authenticator: func(userId string, password string) bool {
 			if userId == "admin" && password == "admin" {
 				return true
@@ -121,9 +120,9 @@ func performRequest(r http.Handler, method, path string, token string) *httptest
 func TestParseToken(t *testing.T) {
 	// the middleware to test
 	authMiddleware := &JWTMiddleware{
-		Realm:      "test zone",
-		Key:        key,
-		Timeout:    time.Hour,
+		Realm:   "test zone",
+		Key:     key,
+		Timeout: time.Hour,
 		Authenticator: func(userId string, password string) bool {
 			if userId == "admin" && password == "admin" {
 				return true
@@ -158,9 +157,9 @@ func TestParseToken(t *testing.T) {
 func TestRefreshHandler(t *testing.T) {
 	// the middleware to test
 	authMiddleware := &JWTMiddleware{
-		Realm:      "test zone",
-		Key:        key,
-		Timeout:    time.Hour,
+		Realm:   "test zone",
+		Key:     key,
+		Timeout: time.Hour,
 		Authenticator: func(userId string, password string) bool {
 			if userId == "admin" && password == "admin" {
 				return true
@@ -186,9 +185,9 @@ func TestRefreshHandler(t *testing.T) {
 func TestAuthorizator(t *testing.T) {
 	// the middleware to test
 	authMiddleware := &JWTMiddleware{
-		Realm:      "test zone",
-		Key:        key,
-		Timeout:    time.Hour,
+		Realm:   "test zone",
+		Key:     key,
+		Timeout: time.Hour,
 		Authenticator: func(userId string, password string) bool {
 			if userId == "admin" && password == "admin" {
 				return true
@@ -223,9 +222,9 @@ func TestAuthorizator(t *testing.T) {
 func TestClaimsDuringAuthorization(t *testing.T) {
 	// the middleware to test
 	authMiddleware := &JWTMiddleware{
-		Realm:      "test zone",
-		Key:        key,
-		Timeout:    time.Hour,
+		Realm:   "test zone",
+		Key:     key,
+		Timeout: time.Hour,
 		PayloadFunc: func(userId string) map[string]interface{} {
 			// Set custom claim, to be checked in Authorizator method
 			return map[string]interface{}{"testkey": "testval", "exp": 0}

@@ -139,45 +139,46 @@ func TestParseToken(t *testing.T) {
 	v1 := r.Group("/v1")
 	v1.Use(authMiddleware.MiddlewareFunc())
 	{
-		v1.GET("/hello", HelloHandler)
+		v1.GET("/auth_test", HelloHandler)
 	}
 
-	w := performRequest(r, "GET", "/v1/hello", "")
+	w := performRequest(r, "GET", "/v1/auth_test", "")
 	assert.Equal(t, w.Code, http.StatusUnauthorized)
 
-	w = performRequest(r, "GET", "/v1/hello", "Test 1234")
+	w = performRequest(r, "GET", "/v1/auth_test", "Test 1234")
 	assert.Equal(t, w.Code, http.StatusUnauthorized)
 
-	w = performRequest(r, "GET", "/v1/hello", "Bearer "+makeTokenString("HS384"))
+	w = performRequest(r, "GET", "/v1/auth_test", "Bearer "+makeTokenString("HS384"))
 	assert.Equal(t, w.Code, http.StatusUnauthorized)
 
-	w = performRequest(r, "GET", "/v1/hello", "Bearer "+makeTokenString("HS256"))
+	w = performRequest(r, "GET", "/v1/auth_test", "Bearer "+makeTokenString("HS256"))
 	assert.Equal(t, w.Code, http.StatusOK)
 }
 
-// func TestAuthJWT(t *testing.T) {
-// 	// the middleware to test
-// 	authMiddleware := &JWTMiddleware{
-// 		Realm:      "test zone",
-// 		Key:        key,
-// 		Timeout:    time.Hour,
-// 		Authenticator: func(userId string, password string) bool {
-// 			if userId == "admin" && password == "admin" {
-// 				return true
-// 			}
-// 			return false
-// 		},
-// 		Authorizator: func(userId string, c *gin.Context) bool {
-// 			return true
-// 		},
-// 	}
+func TestRefreshHandler(t *testing.T) {
+	// the middleware to test
+	authMiddleware := &JWTMiddleware{
+		Realm:      "test zone",
+		Key:        key,
+		Timeout:    time.Hour,
+		Authenticator: func(userId string, password string) bool {
+			if userId == "admin" && password == "admin" {
+				return true
+			}
 
-// 	gin.SetMode(gin.TestMode)
-// 	r := gin.New()
+			return false
+		},
+	}
 
-// 	v1 := r.Group("/v1")
-// 	v1.Use(authMiddleware.MiddlewareFunc())
-// 	{
-// 		v1.GET("/refresh_token", authMiddleware.RefreshHandler)
-// 	}
-// }
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+
+	v1 := r.Group("/v1")
+	v1.Use(authMiddleware.MiddlewareFunc())
+	{
+		v1.GET("/refresh_token", authMiddleware.RefreshHandler)
+	}
+
+	w := performRequest(r, "GET", "/v1/refresh_token", "Bearer "+makeTokenString("HS256"))
+	assert.Equal(t, w.Code, http.StatusOK)
+}

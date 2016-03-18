@@ -4,7 +4,6 @@ package JWT_MIDDLEWARE
 
 import (
 	"errors"
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -94,9 +93,6 @@ func (mw *JWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
 }
 
 func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
-
-	fmt.Println("middlewareImpl")
-
 	token, err := mw.parseToken(c)
 
 	if err != nil {

@@ -101,14 +101,14 @@ func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
 	}
 
 	id := token.Claims["id"].(string)
+	c.Set("JWT_PAYLOAD", token.Claims)
+	c.Set("userID", id)
 
 	if !mw.Authorizator(id, c) {
 		mw.unauthorized(c, http.StatusForbidden, "You don't have permission to access.")
 		return
 	}
 
-	c.Set("JWT_PAYLOAD", token.Claims)
-	c.Set("userID", id)
 	c.Next()
 }
 
@@ -205,9 +205,7 @@ func ExtractClaims(c *gin.Context) map[string]interface{} {
 }
 
 // Handler that clients can use to get a jwt token.
-// Payload needs to be json in the form of {"username": "USERNAME", "password": "PASSWORD"}.
-// Reply will be of the form {"token": "TOKEN"}.
-func (mw *JWTMiddleware) TokenGenerator(c *gin.Context, userID string) string {
+func (mw *JWTMiddleware) TokenGenerator(userID string) string {
 	token := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))
 
 	if mw.PayloadFunc != nil {
@@ -219,12 +217,7 @@ func (mw *JWTMiddleware) TokenGenerator(c *gin.Context, userID string) string {
 	token.Claims["id"] = userID
 	token.Claims["exp"] = time.Now().Add(mw.Timeout).Unix()
 
-	tokenString, err := token.SignedString(mw.Key)
-
-	if err != nil {
-		mw.unauthorized(c, http.StatusUnauthorized, "Create JWT Token faild")
-		return "null"
-	}
+	tokenString, _ := token.SignedString(mw.Key)
 
 	return tokenString
 }

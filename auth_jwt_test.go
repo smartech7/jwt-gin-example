@@ -219,3 +219,43 @@ func TestAuthorizator(t *testing.T) {
 	w = performRequest(r, "GET", "/v1/auth_test", "Bearer "+makeTokenString("HS256", "admin"))
 	assert.Equal(t, w.Code, http.StatusOK)
 }
+
+func TestClaimsDuringAuthorization(t *testing.T) {
+	// the middleware to test
+	authMiddleware := &JWTMiddleware{
+		Realm:      "test zone",
+		Key:        key,
+		Timeout:    time.Hour,
+		PayloadFunc: func(userId string) map[string]interface{} {
+			// Set custom claim, to be checked in Authorizator method
+			return map[string]interface{}{"testkey": "testval", "exp": 0}
+		},
+		Authenticator: func(userId string, password string) bool {
+			if userId == "admin" && password == "admin" {
+				return true
+			}
+			return false
+		},
+		Authorizator: func(userId string, c *gin.Context) bool {
+			jwt_claims := ExtractClaims(c)
+
+			// Check the actual claim, set in PayloadFunc
+			return (jwt_claims["testkey"] == "testval")
+		},
+	}
+
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.POST("/login", authMiddleware.LoginHandler)
+
+	v1 := r.Group("/v1")
+	v1.Use(authMiddleware.MiddlewareFunc())
+	{
+		v1.GET("/auth_test", HelloHandler)
+	}
+
+	userToken := authMiddleware.TokenGenerator("admin")
+
+	w := performRequest(r, "GET", "/v1/auth_test", "Bearer "+userToken)
+	assert.Equal(t, w.Code, http.StatusOK)
+}

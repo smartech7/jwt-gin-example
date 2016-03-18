@@ -18,12 +18,23 @@ var (
 	key = []byte("secret key")
 )
 
-func makeTokenString(username string, key []byte) string {
-	token := jwt.New(jwt.GetSigningMethod("HS256"))
+func makeTokenString(SigningAlgorithm string) string {
+
+	if SigningAlgorithm == "" {
+		SigningAlgorithm = "HS256"
+	}
+
+	token := jwt.New(jwt.GetSigningMethod(SigningAlgorithm))
 	token.Claims["id"] = "admin"
 	token.Claims["exp"] = time.Now().Add(time.Hour).Unix()
 	tokenString, _ := token.SignedString(key)
 	return tokenString
+}
+
+func HelloHandler(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"text":         "Hello World.",
+	})
 }
 
 func TestLoginHandler(t *testing.T) {
@@ -43,11 +54,6 @@ func TestLoginHandler(t *testing.T) {
 			return true
 		},
 	}
-
-	gin.SetMode(gin.TestMode)
-	r := gin.New()
-
-	r.POST("/login", authMiddleware.LoginHandler)
 
 	// Missing usename or password
 	data := `{"username":"admin"}`
@@ -97,6 +103,56 @@ func TestLoginHandler(t *testing.T) {
 			assert.Contains(t, "expire", r.Body.String())
 			assert.Equal(t, r.Code, http.StatusOK)
 		})
+}
+
+func performRequest(r http.Handler, method, path string, token string) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest(method, path, nil)
+
+	if token != "" {
+		req.Header.Set("Authorization", token)
+	}
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	return w
+}
+
+func TestParseToken(t *testing.T) {
+	// the middleware to test
+	authMiddleware := &JWTMiddleware{
+		Realm:      "test zone",
+		Key:        key,
+		Timeout:    time.Hour,
+		Authenticator: func(userId string, password string) bool {
+			if userId == "admin" && password == "admin" {
+				return true
+			}
+
+			return false
+		},
+	}
+
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+
+	v1 := r.Group("/v1")
+	v1.Use(authMiddleware.MiddlewareFunc())
+	{
+		v1.GET("/hello", HelloHandler)
+	}
+
+	w := performRequest(r, "GET", "/v1/hello", "")
+	assert.Equal(t, w.Code, http.StatusUnauthorized)
+
+	w = performRequest(r, "GET", "/v1/hello", "Test 1234")
+	assert.Equal(t, w.Code, http.StatusUnauthorized)
+
+	w = performRequest(r, "GET", "/v1/hello", "Bearer "+makeTokenString("HS384"))
+	assert.Equal(t, w.Code, http.StatusUnauthorized)
+
+	w = performRequest(r, "GET", "/v1/hello", "Bearer "+makeTokenString("HS256"))
+	assert.Equal(t, w.Code, http.StatusOK)
 }
 
 // func TestAuthJWT(t *testing.T) {

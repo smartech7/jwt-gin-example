@@ -155,7 +155,6 @@ func (mw *JWTMiddleware) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(http.StatusOK)
 	c.JSON(http.StatusOK, gin.H{
 		"token":  tokenString,
 		"expire": expire.Format(time.RFC3339),

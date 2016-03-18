@@ -18,14 +18,14 @@ var (
 	key = []byte("secret key")
 )
 
-func makeTokenString(SigningAlgorithm string) string {
+func makeTokenString(SigningAlgorithm string, username string) string {
 
 	if SigningAlgorithm == "" {
 		SigningAlgorithm = "HS256"
 	}
 
 	token := jwt.New(jwt.GetSigningMethod(SigningAlgorithm))
-	token.Claims["id"] = "admin"
+	token.Claims["id"] = username
 	token.Claims["exp"] = time.Now().Add(time.Hour).Unix()
 	tokenString, _ := token.SignedString(key)
 	return tokenString
@@ -148,10 +148,10 @@ func TestParseToken(t *testing.T) {
 	w = performRequest(r, "GET", "/v1/auth_test", "Test 1234")
 	assert.Equal(t, w.Code, http.StatusUnauthorized)
 
-	w = performRequest(r, "GET", "/v1/auth_test", "Bearer "+makeTokenString("HS384"))
+	w = performRequest(r, "GET", "/v1/auth_test", "Bearer "+makeTokenString("HS384", "admin"))
 	assert.Equal(t, w.Code, http.StatusUnauthorized)
 
-	w = performRequest(r, "GET", "/v1/auth_test", "Bearer "+makeTokenString("HS256"))
+	w = performRequest(r, "GET", "/v1/auth_test", "Bearer "+makeTokenString("HS256", "admin"))
 	assert.Equal(t, w.Code, http.StatusOK)
 }
 
@@ -179,6 +179,43 @@ func TestRefreshHandler(t *testing.T) {
 		v1.GET("/refresh_token", authMiddleware.RefreshHandler)
 	}
 
-	w := performRequest(r, "GET", "/v1/refresh_token", "Bearer "+makeTokenString("HS256"))
+	w := performRequest(r, "GET", "/v1/refresh_token", "Bearer "+makeTokenString("HS256", "admin"))
+	assert.Equal(t, w.Code, http.StatusOK)
+}
+
+func TestAuthorizator(t *testing.T) {
+	// the middleware to test
+	authMiddleware := &JWTMiddleware{
+		Realm:      "test zone",
+		Key:        key,
+		Timeout:    time.Hour,
+		Authenticator: func(userId string, password string) bool {
+			if userId == "admin" && password == "admin" {
+				return true
+			}
+			return false
+		},
+		Authorizator: func(userId string, c *gin.Context) bool {
+			if userId != "admin" {
+				return false
+			}
+
+			return true
+		},
+	}
+
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+
+	v1 := r.Group("/v1")
+	v1.Use(authMiddleware.MiddlewareFunc())
+	{
+		v1.GET("/auth_test", HelloHandler)
+	}
+
+	w := performRequest(r, "GET", "/v1/auth_test", "Bearer "+makeTokenString("HS256", "test"))
+	assert.Equal(t, w.Code, http.StatusForbidden)
+
+	w = performRequest(r, "GET", "/v1/auth_test", "Bearer "+makeTokenString("HS256", "admin"))
 	assert.Equal(t, w.Code, http.StatusOK)
 }

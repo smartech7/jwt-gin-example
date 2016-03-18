@@ -39,7 +39,7 @@ func HelloHandler(c *gin.Context) {
 func TestLoginHandler(t *testing.T) {
 
 	// the middleware to test
-	authMiddleware := &JWTMiddleware{
+	authMiddleware := &GinJWTMiddleware{
 		Realm:   "test zone",
 		Key:     key,
 		Timeout: time.Hour,
@@ -119,7 +119,7 @@ func performRequest(r http.Handler, method, path string, token string) *httptest
 
 func TestParseToken(t *testing.T) {
 	// the middleware to test
-	authMiddleware := &JWTMiddleware{
+	authMiddleware := &GinJWTMiddleware{
 		Realm:   "test zone",
 		Key:     key,
 		Timeout: time.Hour,
@@ -156,7 +156,7 @@ func TestParseToken(t *testing.T) {
 
 func TestRefreshHandler(t *testing.T) {
 	// the middleware to test
-	authMiddleware := &JWTMiddleware{
+	authMiddleware := &GinJWTMiddleware{
 		Realm:   "test zone",
 		Key:     key,
 		Timeout: time.Hour,
@@ -184,7 +184,7 @@ func TestRefreshHandler(t *testing.T) {
 
 func TestAuthorizator(t *testing.T) {
 	// the middleware to test
-	authMiddleware := &JWTMiddleware{
+	authMiddleware := &GinJWTMiddleware{
 		Realm:   "test zone",
 		Key:     key,
 		Timeout: time.Hour,
@@ -221,7 +221,7 @@ func TestAuthorizator(t *testing.T) {
 
 func TestClaimsDuringAuthorization(t *testing.T) {
 	// the middleware to test
-	authMiddleware := &JWTMiddleware{
+	authMiddleware := &GinJWTMiddleware{
 		Realm:   "test zone",
 		Key:     key,
 		Timeout: time.Hour,

@@ -10,12 +10,12 @@ import (
 	"time"
 )
 
-// JWTMiddleware provides a Json-Web-Token authentication implementation. On failure, a 401 HTTP response
+// GinJWTMiddleware provides a Json-Web-Token authentication implementation. On failure, a 401 HTTP response
 // is returned. On success, the wrapped middleware is called, and the userId is made available as
 // request.Env["userID"].(string).
 // Users can get a token by posting a json request to LoginHandler. The token then needs to be passed in
 // the Authentication header. Example: Authorization:Bearer XXX_TOKEN_XXX#!/usr/bin/env
-type JWTMiddleware struct {
+type GinJWTMiddleware struct {
 	// Realm name to display to the user. Required.
 	Realm string
 
@@ -54,7 +54,7 @@ type Login struct {
 }
 
 // MiddlewareInit initialize jwt configs.
-func (mw *JWTMiddleware) MiddlewareInit() {
+func (mw *GinJWTMiddleware) MiddlewareInit() {
 	if mw.Realm == "" {
 		log.Fatal("Realm is required")
 	}
@@ -82,8 +82,8 @@ func (mw *JWTMiddleware) MiddlewareInit() {
 	}
 }
 
-// MiddlewareFunc makes JWTMiddleware implement the Middleware interface.
-func (mw *JWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
+// MiddlewareFunc makes GinJWTMiddleware implement the Middleware interface.
+func (mw *GinJWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
 	mw.MiddlewareInit()
 
 	return func(c *gin.Context) {
@@ -92,7 +92,7 @@ func (mw *JWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
 	}
 }
 
-func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
+func (mw *GinJWTMiddleware) middlewareImpl(c *gin.Context) {
 	token, err := mw.parseToken(c)
 
 	if err != nil {
@@ -115,7 +115,7 @@ func (mw *JWTMiddleware) middlewareImpl(c *gin.Context) {
 // LoginHandler can be used by clients to get a jwt token.
 // Payload needs to be json in the form of {"username": "USERNAME", "password": "PASSWORD"}.
 // Reply will be of the form {"token": "TOKEN"}.
-func (mw *JWTMiddleware) LoginHandler(c *gin.Context) {
+func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 
 	// Initial middleware default setting.
 	mw.MiddlewareInit()
@@ -158,9 +158,9 @@ func (mw *JWTMiddleware) LoginHandler(c *gin.Context) {
 }
 
 // RefreshHandler can be used to refresh a token. The token still needs to be valid on refresh.
-// Shall be put under an endpoint that is using the JWTMiddleware.
+// Shall be put under an endpoint that is using the GinJWTMiddleware.
 // Reply will be of the form {"token": "TOKEN"}.
-func (mw *JWTMiddleware) RefreshHandler(c *gin.Context) {
+func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 	token, err := mw.parseToken(c)
 
 	if err != nil {
@@ -205,7 +205,7 @@ func ExtractClaims(c *gin.Context) map[string]interface{} {
 }
 
 // TokenGenerator handler that clients can use to get a jwt token.
-func (mw *JWTMiddleware) TokenGenerator(userID string) string {
+func (mw *GinJWTMiddleware) TokenGenerator(userID string) string {
 	token := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))
 
 	if mw.PayloadFunc != nil {
@@ -222,7 +222,7 @@ func (mw *JWTMiddleware) TokenGenerator(userID string) string {
 	return tokenString
 }
 
-func (mw *JWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
+func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 	authHeader := c.Request.Header.Get("Authorization")
 
 	if authHeader == "" {
@@ -243,7 +243,7 @@ func (mw *JWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 	})
 }
 
-func (mw *JWTMiddleware) unauthorized(c *gin.Context, code int, message string) {
+func (mw *GinJWTMiddleware) unauthorized(c *gin.Context, code int, message string) {
 	c.Header("WWW-Authenticate", "JWT realm="+mw.Realm)
 
 	c.JSON(code, gin.H{

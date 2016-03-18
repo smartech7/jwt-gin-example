@@ -12,7 +12,7 @@ import (
 
 // GinJWTMiddleware provides a Json-Web-Token authentication implementation. On failure, a 401 HTTP response
 // is returned. On success, the wrapped middleware is called, and the userId is made available as
-// request.Env["userID"].(string).
+// c.Get("userId").(string).
 // Users can get a token by posting a json request to LoginHandler. The token then needs to be passed in
 // the Authentication header. Example: Authorization:Bearer XXX_TOKEN_XXX#!/usr/bin/env
 type GinJWTMiddleware struct {
@@ -40,7 +40,7 @@ type GinJWTMiddleware struct {
 
 	// Callback function that will be called during login.
 	// Using this function it is possible to add additional payload data to the webtoken.
-	// The data is then made available during requests via request.Env["JWT_PAYLOAD"].
+	// The data is then made available during requests via c.Get("JWT_PAYLOAD").
 	// Note that the payload is not encrypted.
 	// The attributes mentioned on jwt.io can't be used as keys for the map.
 	// Optional, by default no additional data will be set.

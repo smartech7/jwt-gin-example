@@ -182,7 +182,15 @@ func TestRefreshHandler(t *testing.T) {
 		v1.GET("/refresh_token", authMiddleware.RefreshHandler)
 	}
 
-	w := performRequest(r, "GET", "/v1/refresh_token", "Bearer "+makeTokenString("HS256", "admin"))
+	// missing token
+	w := performRequest(r, "GET", "/v1/refresh_token", "")
+	assert.Equal(t, w.Code, http.StatusUnauthorized)
+
+	// wrong token
+	w = performRequest(r, "GET", "/v1/refresh_token", "Test 1234")
+	assert.Equal(t, w.Code, http.StatusUnauthorized)
+
+	w = performRequest(r, "GET", "/v1/refresh_token", "Bearer "+makeTokenString("HS256", "admin"))
 	assert.Equal(t, w.Code, http.StatusOK)
 }
 

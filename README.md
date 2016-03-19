@@ -1,6 +1,6 @@
 # JWT Middleware for Gin Framework
 
-[![Build Status](https://travis-ci.org/appleboy/gin-jwt.svg?branch=master)](https://travis-ci.org/appleboy/gin-jwt) [![Go Report Card](https://goreportcard.com/badge/github.com/appleboy/gin-jwt)](https://goreportcard.com/report/github.com/appleboy/gin-jwt) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/appleboy/gin-jwt/master/LICENSE)
+[![Build Status](https://travis-ci.org/appleboy/gin-jwt.svg?branch=master)](https://travis-ci.org/appleboy/gin-jwt) [![Go Report Card](https://goreportcard.com/badge/github.com/appleboy/gin-jwt)](https://goreportcard.com/report/github.com/appleboy/gin-jwt) [![Coverage Status](https://coveralls.io/repos/github/appleboy/gin-jwt/badge.svg?branch=master)](https://coveralls.io/github/appleboy/gin-jwt?branch=master) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/appleboy/gin-jwt/master/LICENSE)
 
 This is a middleware for [Gin](https://github.com/gin-gonic/gin).
 

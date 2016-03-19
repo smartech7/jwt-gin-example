@@ -14,4 +14,78 @@ $ go get -u https://github.com/appleboy/gin-jwt
 
 ## Example
 
-Please see server example file.
+Please see [server example file](example/server.go).
+
+## Demo
+
+Please run example/server.go file and listen `8000` port.
+
+```bash
+$ go run example/server.go
+```
+
+Download and install [httpie](https://github.com/jkbrzt/httpie) CLI HTTP client.
+
+### Login API:
+
+```bash
+$ http -v --json POST localhost:8000/login username=admin password=admin
+```
+
+Output screenshot
+
+![api screenshot](screenshot/login.png)
+
+### Refresh token API:
+
+```bash
+$ http -v -f GET localhost:8000/auth/refresh_token "Authorization:Bearer xxxxxxxxx"  "Content-Type: application/json"
+```
+
+Output screenshot
+
+![api screenshot](screenshot/refresh_token.png)
+
+### Hello world
+
+Please login as `admin` and password as `admin`
+
+```bash
+$ http -f GET localhost:8000/auth/hello "Authorization:Bearer xxxxxxxxx"  "Content-Type: application/json"
+```
+
+Response message `200 OK`:
+
+```
+HTTP/1.1 200 OK
+Content-Length: 24
+Content-Type: application/json; charset=utf-8
+Date: Sat, 19 Mar 2016 03:02:57 GMT
+
+{
+    "text": "Hello World."
+}
+```
+
+### Authorization
+
+Please login as `test` and password as `test`
+
+```bash
+$ http -f GET localhost:8000/auth/hello "Authorization:Bearer xxxxxxxxx"  "Content-Type: application/json"
+```
+
+Response message `403 Forbidden`:
+
+```
+HTTP/1.1 403 Forbidden
+Content-Length: 62
+Content-Type: application/json; charset=utf-8
+Date: Sat, 19 Mar 2016 03:05:40 GMT
+Www-Authenticate: JWT realm=test zone
+
+{
+    "code": 403,
+    "message": "You don't have permission to access."
+}
+```

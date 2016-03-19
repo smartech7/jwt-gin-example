@@ -43,6 +43,10 @@ func TestLoginHandler(t *testing.T) {
 		Realm:   "test zone",
 		Key:     key,
 		Timeout: time.Hour,
+		PayloadFunc: func(userId string) map[string]interface{} {
+			// Set custom claim, to be checked in Authorizator method
+			return map[string]interface{}{"testkey": "testval", "exp": 0}
+		},
 		Authenticator: func(userId string, password string) bool {
 			if userId == "admin" && password == "admin" {
 				return true

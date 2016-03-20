@@ -1,9 +1,9 @@
 package main
 
-import(
-	"github.com/gin-gonic/gin"
+import (
 	"github.com/appleboy/gin-jwt"
 	"github.com/fvbock/endless"
+	"github.com/gin-gonic/gin"
 	"os"
 	"time"
 )
@@ -29,12 +29,12 @@ func main() {
 		Realm:   "test zone",
 		Key:     []byte("secret key"),
 		Timeout: time.Hour,
-		Authenticator: func(userId string, password string) bool {
+		Authenticator: func(userId string, password string) (string, bool) {
 			if (userId == "admin" && password == "admin") || (userId == "test" && password == "test") {
-				return true
+				return userId, true
 			}
 
-			return false
+			return userId, false
 		},
 		Authorizator: func(userId string, c *gin.Context) bool {
 			if userId == "admin" {

@@ -168,12 +168,7 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 // Shall be put under an endpoint that is using the GinJWTMiddleware.
 // Reply will be of the form {"token": "TOKEN"}.
 func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
-	token, err := mw.parseToken(c)
-
-	if err != nil {
-		mw.unauthorized(c, http.StatusUnauthorized, err.Error())
-		return
-	}
+	token, _ := mw.parseToken(c)
 
 	// Create the token
 	newToken := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))

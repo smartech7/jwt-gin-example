@@ -47,11 +47,12 @@ func TestLoginHandler(t *testing.T) {
 			// Set custom claim, to be checked in Authorizator method
 			return map[string]interface{}{"testkey": "testval", "exp": 0}
 		},
-		Authenticator: func(userId string, password string) bool {
+		Authenticator: func(userId string, password string) (string, bool) {
 			if userId == "admin" && password == "admin" {
-				return true
+				return "", true
 			}
-			return false
+
+			return "", false
 		},
 		Authorizator: func(userId string, c *gin.Context) bool {
 			return true
@@ -127,12 +128,12 @@ func TestParseToken(t *testing.T) {
 		Realm:   "test zone",
 		Key:     key,
 		Timeout: time.Hour,
-		Authenticator: func(userId string, password string) bool {
+		Authenticator: func(userId string, password string) (string, bool) {
 			if userId == "admin" && password == "admin" {
-				return true
+				return userId, true
 			}
 
-			return false
+			return userId, false
 		},
 	}
 
@@ -164,12 +165,12 @@ func TestRefreshHandler(t *testing.T) {
 		Realm:   "test zone",
 		Key:     key,
 		Timeout: time.Hour,
-		Authenticator: func(userId string, password string) bool {
+		Authenticator: func(userId string, password string) (string, bool) {
 			if userId == "admin" && password == "admin" {
-				return true
+				return userId, true
 			}
 
-			return false
+			return userId, false
 		},
 	}
 
@@ -200,11 +201,11 @@ func TestAuthorizator(t *testing.T) {
 		Realm:   "test zone",
 		Key:     key,
 		Timeout: time.Hour,
-		Authenticator: func(userId string, password string) bool {
+		Authenticator: func(userId string, password string) (string, bool) {
 			if userId == "admin" && password == "admin" {
-				return true
+				return userId, true
 			}
-			return false
+			return userId, false
 		},
 		Authorizator: func(userId string, c *gin.Context) bool {
 			if userId != "admin" {
@@ -241,23 +242,27 @@ func TestClaimsDuringAuthorization(t *testing.T) {
 			// Set custom claim, to be checked in Authorizator method
 			return map[string]interface{}{"testkey": "testval", "exp": 0}
 		},
-		Authenticator: func(userId string, password string) bool {
+		Authenticator: func(userId string, password string) (string, bool) {
 			if userId == "admin" && password == "admin" {
-				return true
+				return "", true
 			}
-			return false
+
+			if userId == "test" && password == "test" {
+				return "Administrator", true
+			}
+
+			return userId, false
 		},
 		Authorizator: func(userId string, c *gin.Context) bool {
 			jwtClaims := ExtractClaims(c)
 
 			// Check the actual claim, set in PayloadFunc
-			return (jwtClaims["testkey"] == "testval")
+			return (jwtClaims["testkey"] == "testval" && (jwtClaims["id"] == "admin" || jwtClaims["id"] == "Administrator"))
 		},
 	}
 
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	r.POST("/login", authMiddleware.LoginHandler)
 
 	v1 := r.Group("/v1")
 	v1.Use(authMiddleware.MiddlewareFunc())
@@ -268,5 +273,43 @@ func TestClaimsDuringAuthorization(t *testing.T) {
 	userToken := authMiddleware.TokenGenerator("admin")
 
 	w := performRequest(r, "GET", "/v1/auth_test", "Bearer "+userToken)
+	assert.Equal(t, w.Code, http.StatusOK)
+
+	// login as test and set user id as Administrator
+	data := `{"username":"admin","password":"admin"}`
+	tests.RunSimplePost("/login", data,
+		authMiddleware.LoginHandler,
+		func(r *httptest.ResponseRecorder) {
+			var rd map[string]interface{}
+			err := json.NewDecoder(r.Body).Decode(&rd)
+
+			if err != nil {
+				log.Fatalf("JSON Decode fail: %v", err)
+			}
+
+			userToken = rd["token"].(string)
+			assert.Equal(t, r.Code, http.StatusOK)
+		})
+
+	w = performRequest(r, "GET", "/v1/auth_test", "Bearer "+userToken)
+	assert.Equal(t, w.Code, http.StatusOK)
+
+	// login as test and set user id as Administrator
+	data = `{"username":"test","password":"test"}`
+	tests.RunSimplePost("/login", data,
+		authMiddleware.LoginHandler,
+		func(r *httptest.ResponseRecorder) {
+			var rd map[string]interface{}
+			err := json.NewDecoder(r.Body).Decode(&rd)
+
+			if err != nil {
+				log.Fatalf("JSON Decode fail: %v", err)
+			}
+
+			userToken = rd["token"].(string)
+			assert.Equal(t, r.Code, http.StatusOK)
+		})
+
+	w = performRequest(r, "GET", "/v1/auth_test", "Bearer "+userToken)
 	assert.Equal(t, w.Code, http.StatusOK)
 }

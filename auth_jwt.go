@@ -31,7 +31,8 @@ type GinJWTMiddleware struct {
 
 	// Callback function that should perform the authentication of the user based on userId and
 	// password. Must return true on success, false on failure. Required.
-	Authenticator func(userId string, password string) bool
+	// Option return user id, if so, user id will be stored in Claim Array.
+	Authenticator func(userId string, password string) (string, bool)
 
 	// Callback function that should perform the authorization of the authenticated user. Called
 	// only after an authentication success. Must return true on success, false on failure.
@@ -127,7 +128,9 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	if !mw.Authenticator(loginVals.Username, loginVals.Password) {
+	userId, ok := mw.Authenticator(loginVals.Username, loginVals.Password)
+
+	if !ok {
 		mw.unauthorized(c, http.StatusUnauthorized, "Incorrect Username / Password")
 		return
 	}
@@ -141,8 +144,12 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 		}
 	}
 
+	if userId == "" {
+		userId = loginVals.Username
+	}
+
 	expire := time.Now().Add(mw.Timeout)
-	token.Claims["id"] = loginVals.Username
+	token.Claims["id"] = userId
 	token.Claims["exp"] = expire.Unix()
 	tokenString, err := token.SignedString(mw.Key)
 
@@ -161,12 +168,7 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 // Shall be put under an endpoint that is using the GinJWTMiddleware.
 // Reply will be of the form {"token": "TOKEN"}.
 func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
-	token, err := mw.parseToken(c)
-
-	if err != nil {
-		mw.unauthorized(c, http.StatusUnauthorized, err.Error())
-		return
-	}
+	token, _ := mw.parseToken(c)
 
 	// Create the token
 	newToken := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))

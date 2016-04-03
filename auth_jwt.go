@@ -55,25 +55,25 @@ type Login struct {
 }
 
 // MiddlewareInit initialize jwt configs.
-func (mw *GinJWTMiddleware) MiddlewareInit() {
+func (mw *GinJWTMiddleware) MiddlewareInit() error {
 	if mw.Realm == "" {
-		log.Fatal("Realm is required")
+		return errors.New("Realm is required")
+	}
+
+	if mw.Authenticator == nil {
+		return errors.New("Authenticator is required")
+	}
+
+	if mw.Key == nil {
+		return errors.New("Key is required")
 	}
 
 	if mw.SigningAlgorithm == "" {
 		mw.SigningAlgorithm = "HS256"
 	}
 
-	if mw.Key == nil {
-		log.Fatal("Key required")
-	}
-
 	if mw.Timeout == 0 {
 		mw.Timeout = time.Hour
-	}
-
-	if mw.Authenticator == nil {
-		log.Fatal("Authenticator is required")
 	}
 
 	if mw.Authorizator == nil {
@@ -81,11 +81,15 @@ func (mw *GinJWTMiddleware) MiddlewareInit() {
 			return true
 		}
 	}
+
+	return nil
 }
 
 // MiddlewareFunc makes GinJWTMiddleware implement the Middleware interface.
 func (mw *GinJWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
-	mw.MiddlewareInit()
+	if err := mw.MiddlewareInit(); err != nil {
+		log.Fatal(err.Error())
+	}
 
 	return func(c *gin.Context) {
 		mw.middlewareImpl(c)

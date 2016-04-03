@@ -36,6 +36,60 @@ func HelloHandler(c *gin.Context) {
 	})
 }
 
+func TestMissingRealm(t *testing.T) {
+
+	authMiddleware := &GinJWTMiddleware{
+		Key:     key,
+		Timeout: time.Hour,
+		Authenticator: func(userId string, password string) (string, bool) {
+			if userId == "admin" && password == "admin" {
+				return "", true
+			}
+
+			return "", false
+		},
+	}
+
+	err := authMiddleware.MiddlewareInit()
+
+	assert.Error(t, err)
+	assert.Equal(t, "Realm is required", err.Error())
+}
+
+func TestMissingAuthenticator(t *testing.T) {
+
+	authMiddleware := &GinJWTMiddleware{
+		Realm:   "test zone",
+		Key:     key,
+		Timeout: time.Hour,
+	}
+
+	err := authMiddleware.MiddlewareInit()
+
+	assert.Error(t, err)
+	assert.Equal(t, "Authenticator is required", err.Error())
+}
+
+func TestMissingKey(t *testing.T) {
+
+	authMiddleware := &GinJWTMiddleware{
+		Realm:   "test zone",
+		Timeout: time.Hour,
+		Authenticator: func(userId string, password string) (string, bool) {
+			if userId == "admin" && password == "admin" {
+				return "", true
+			}
+
+			return "", false
+		},
+	}
+
+	err := authMiddleware.MiddlewareInit()
+
+	assert.Error(t, err)
+	assert.Equal(t, "Key is required", err.Error())
+}
+
 func TestLoginHandler(t *testing.T) {
 
 	// the middleware to test

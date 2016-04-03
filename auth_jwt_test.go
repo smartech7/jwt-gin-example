@@ -90,13 +90,31 @@ func TestMissingKey(t *testing.T) {
 	assert.Equal(t, "Key is required", err.Error())
 }
 
+func TestMissingTimeOut(t *testing.T) {
+
+	authMiddleware := &GinJWTMiddleware{
+		Realm:   "test zone",
+		Key:     key,
+		Authenticator: func(userId string, password string) (string, bool) {
+			if userId == "admin" && password == "admin" {
+				return "", true
+			}
+
+			return "", false
+		},
+	}
+
+	authMiddleware.MiddlewareInit()
+
+	assert.Equal(t, time.Hour, authMiddleware.Timeout)
+}
+
 func TestLoginHandler(t *testing.T) {
 
 	// the middleware to test
 	authMiddleware := &GinJWTMiddleware{
 		Realm:   "test zone",
 		Key:     key,
-		Timeout: time.Hour,
 		PayloadFunc: func(userId string) map[string]interface{} {
 			// Set custom claim, to be checked in Authorizator method
 			return map[string]interface{}{"testkey": "testval", "exp": 0}

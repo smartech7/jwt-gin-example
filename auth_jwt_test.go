@@ -1,14 +1,11 @@
 package jwt
 
 import (
-	// "encoding/json"
-	// "github.com/appleboy/gin-jwt-server/tests"
-	"github.com/buger/jsonparser"
 	"github.com/appleboy/gofight"
+	"github.com/buger/jsonparser"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	// "log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -95,8 +92,8 @@ func TestMissingKey(t *testing.T) {
 func TestMissingTimeOut(t *testing.T) {
 
 	authMiddleware := &GinJWTMiddleware{
-		Realm:   "test zone",
-		Key:     key,
+		Realm: "test zone",
+		Key:   key,
 		Authenticator: func(userId string, password string) (string, bool) {
 			if userId == "admin" && password == "admin" {
 				return "", true
@@ -137,8 +134,8 @@ func TestLoginHandler(t *testing.T) {
 
 	// the middleware to test
 	authMiddleware := &GinJWTMiddleware{
-		Realm:   "test zone",
-		Key:     key,
+		Realm: "test zone",
+		Key:   key,
 		PayloadFunc: func(userId string) map[string]interface{} {
 			// Set custom claim, to be checked in Authorizator method
 			return map[string]interface{}{"testkey": "testval", "exp": 0}
@@ -246,7 +243,7 @@ func TestParseToken(t *testing.T) {
 
 	r.GET("/auth/hello").
 		SetHeader(gofight.H{
-			"Authorization": "Bearer "+makeTokenString("HS384", "admin"),
+			"Authorization": "Bearer " + makeTokenString("HS384", "admin"),
 		}).
 		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, http.StatusUnauthorized, r.Code)
@@ -254,7 +251,7 @@ func TestParseToken(t *testing.T) {
 
 	r.GET("/auth/hello").
 		SetHeader(gofight.H{
-			"Authorization": "Bearer "+makeTokenString("HS256", "admin"),
+			"Authorization": "Bearer " + makeTokenString("HS256", "admin"),
 		}).
 		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, http.StatusOK, r.Code)
@@ -298,7 +295,7 @@ func TestRefreshHandler(t *testing.T) {
 
 	r.GET("/auth/refresh_token").
 		SetHeader(gofight.H{
-			"Authorization": "Bearer "+makeTokenString("HS256", "admin"),
+			"Authorization": "Bearer " + makeTokenString("HS256", "admin"),
 		}).
 		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, http.StatusOK, r.Code)
@@ -332,7 +329,7 @@ func TestAuthorizator(t *testing.T) {
 
 	r.GET("/auth/hello").
 		SetHeader(gofight.H{
-			"Authorization": "Bearer "+makeTokenString("HS256", "test"),
+			"Authorization": "Bearer " + makeTokenString("HS256", "test"),
 		}).
 		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, http.StatusForbidden, r.Code)
@@ -340,7 +337,7 @@ func TestAuthorizator(t *testing.T) {
 
 	r.GET("/auth/hello").
 		SetHeader(gofight.H{
-			"Authorization": "Bearer "+makeTokenString("HS256", "admin"),
+			"Authorization": "Bearer " + makeTokenString("HS256", "admin"),
 		}).
 		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, http.StatusOK, r.Code)
@@ -383,7 +380,7 @@ func TestClaimsDuringAuthorization(t *testing.T) {
 
 	r.GET("/auth/hello").
 		SetHeader(gofight.H{
-			"Authorization": "Bearer "+userToken,
+			"Authorization": "Bearer " + userToken,
 		}).
 		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, http.StatusOK, r.Code)
@@ -404,7 +401,7 @@ func TestClaimsDuringAuthorization(t *testing.T) {
 
 	r.GET("/auth/hello").
 		SetHeader(gofight.H{
-			"Authorization": "Bearer "+userToken,
+			"Authorization": "Bearer " + userToken,
 		}).
 		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, http.StatusOK, r.Code)
@@ -425,7 +422,7 @@ func TestClaimsDuringAuthorization(t *testing.T) {
 
 	r.GET("/auth/hello").
 		SetHeader(gofight.H{
-			"Authorization": "Bearer "+userToken,
+			"Authorization": "Bearer " + userToken,
 		}).
 		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, http.StatusOK, r.Code)

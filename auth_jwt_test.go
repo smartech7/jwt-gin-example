@@ -29,12 +29,6 @@ func makeTokenString(SigningAlgorithm string, username string) string {
 	return tokenString
 }
 
-func HelloHandler(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"text": "Hello World.",
-	})
-}
-
 func TestMissingRealm(t *testing.T) {
 
 	authMiddleware := &GinJWTMiddleware{

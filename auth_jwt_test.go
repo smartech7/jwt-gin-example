@@ -422,3 +422,33 @@ func TestClaimsDuringAuthorization(t *testing.T) {
 			assert.Equal(t, http.StatusOK, r.Code)
 		})
 }
+
+func TestUnauthorized(t *testing.T) {
+	// the middleware to test
+	authMiddleware := &GinJWTMiddleware{
+		Realm:   "test zone",
+		Key:     key,
+		Timeout: time.Hour,
+		Authenticator: func(userId string, password string) (string, bool) {
+			if userId == "admin" && password == "admin" {
+				return userId, true
+			}
+			return userId, false
+		},
+		Unauthorized: func(c *gin.Context, code int, message string) {
+			c.String(code, message)
+		},
+	}
+
+	handler := ginHandler(authMiddleware)
+
+	r := gofight.New()
+
+	r.GET("/auth/hello").
+		SetHeader(gofight.H{
+			"Authorization": "Bearer 1234",
+		}).
+		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, http.StatusUnauthorized, r.Code)
+		})
+}

@@ -46,6 +46,9 @@ type GinJWTMiddleware struct {
 	// The attributes mentioned on jwt.io can't be used as keys for the map.
 	// Optional, by default no additional data will be set.
 	PayloadFunc func(userId string) map[string]interface{}
+
+	// User can define own Unauthorized func.
+	Unauthorized func(*gin.Context, int, string)
 }
 
 // Login form structure.
@@ -79,6 +82,15 @@ func (mw *GinJWTMiddleware) MiddlewareInit() error {
 	if mw.Authorizator == nil {
 		mw.Authorizator = func(userId string, c *gin.Context) bool {
 			return true
+		}
+	}
+
+	if mw.Unauthorized == nil {
+		mw.Unauthorized = func(c *gin.Context, code int, message string) {
+			c.JSON(code, gin.H{
+				"code":    code,
+				"message": message,
+			})
 		}
 	}
 
@@ -251,12 +263,9 @@ func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 
 func (mw *GinJWTMiddleware) unauthorized(c *gin.Context, code int, message string) {
 	c.Header("WWW-Authenticate", "JWT realm="+mw.Realm)
-
-	c.JSON(code, gin.H{
-		"code":    code,
-		"message": message,
-	})
 	c.Abort()
+
+	mw.Unauthorized(c, code, message)
 
 	return
 }

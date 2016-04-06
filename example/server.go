@@ -43,6 +43,12 @@ func main() {
 
 			return false
 		},
+		Unauthorized: func(c *gin.Context, code int, message string) {
+			c.JSON(code, gin.H{
+				"code":    code,
+				"message": message,
+			})
+		},
 	}
 
 	r.POST("/login", authMiddleware.LoginHandler)

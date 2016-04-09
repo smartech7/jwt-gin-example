@@ -345,8 +345,15 @@ func TestClaimsDuringAuthorization(t *testing.T) {
 		Key:     key,
 		Timeout: time.Hour,
 		PayloadFunc: func(userId string) map[string]interface{} {
+			var testkey string
+			switch userId {
+			case "admin":
+				testkey = "1234"
+			case "test":
+				testkey = "5678"
+			}
 			// Set custom claim, to be checked in Authorizator method
-			return map[string]interface{}{"testkey": "testval", "exp": 0}
+			return map[string]interface{}{"testkey": testkey, "exp": 0}
 		},
 		Authenticator: func(userId string, password string) (string, bool) {
 			if userId == "admin" && password == "admin" {
@@ -362,8 +369,15 @@ func TestClaimsDuringAuthorization(t *testing.T) {
 		Authorizator: func(userId string, c *gin.Context) bool {
 			jwtClaims := ExtractClaims(c)
 
-			// Check the actual claim, set in PayloadFunc
-			return (jwtClaims["testkey"] == "testval" && (jwtClaims["id"] == "admin" || jwtClaims["id"] == "Administrator"))
+			if jwtClaims["testkey"] == "1234" && jwtClaims["id"] == "admin" {
+				return true
+			}
+
+			if jwtClaims["testkey"] == "5678" && jwtClaims["id"] == "Administrator" {
+				return true
+			}
+
+			return false
 		},
 	}
 

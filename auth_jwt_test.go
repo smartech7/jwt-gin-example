@@ -159,7 +159,7 @@ func TestLoginHandler(t *testing.T) {
 
 			message, _ := jsonparser.GetString(data, "message")
 
-			assert.Equal(t, "Missing usename or password", message)
+			assert.Equal(t, "Missing Username or Password", message)
 			assert.Equal(t, http.StatusBadRequest, r.Code)
 		})
 

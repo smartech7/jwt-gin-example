@@ -29,7 +29,7 @@ func main() {
 		Realm:   "test zone",
 		Key:     []byte("secret key"),
 		Timeout: time.Hour,
-		Authenticator: func(userId string, password string) (string, bool) {
+		Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
 			if (userId == "admin" && password == "admin") || (userId == "test" && password == "test") {
 				return userId, true
 			}

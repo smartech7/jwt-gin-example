@@ -144,7 +144,7 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	userId, ok := mw.Authenticator(loginVals.Username, loginVals.Password)
+	userId, ok := mw.Authenticator(loginVals.Username, loginVals.Password, c)
 
 	if !ok {
 		mw.unauthorized(c, http.StatusUnauthorized, "Incorrect Username / Password")

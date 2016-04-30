@@ -45,9 +45,10 @@ func main() {
 
   // the jwt middleware
   authMiddleware := &jwt.GinJWTMiddleware{
-    Realm:   "test zone",
-    Key:     []byte("secret key"),
-    Timeout: time.Hour,
+    Realm:      "test zone",
+    Key:        []byte("secret key"),
+    Timeout:    time.Hour,
+    MaxRefresh: time.Hour * 24,
     Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
       if (userId == "admin" && password == "admin") || (userId == "test" && password == "test") {
         return userId, true

@@ -305,10 +305,9 @@ func TestRefreshHandler(t *testing.T) {
 func TestExpriedTokenOnRefreshHandler(t *testing.T) {
 	// the middleware to test
 	authMiddleware := &GinJWTMiddleware{
-		Realm:      "test zone",
-		Key:        key,
-		Timeout:    time.Hour,
-		MaxRefresh: 0,
+		Realm:   "test zone",
+		Key:     key,
+		Timeout: time.Hour,
 		Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
 			if userId == "admin" && password == "admin" {
 				return userId, true

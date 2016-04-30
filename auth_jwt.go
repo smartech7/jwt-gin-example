@@ -29,6 +29,12 @@ type GinJWTMiddleware struct {
 	// Duration that a jwt token is valid. Optional, defaults to one hour.
 	Timeout time.Duration
 
+	// This field allows clients to refresh their token until MaxRefresh has passed.
+	// Note that clients can refresh their token in the last moment of MaxRefresh.
+	// This means that the maximum validity timespan for a token is MaxRefresh + Timeout.
+	// Optional, defaults to 0 meaning not refreshable.
+	MaxRefresh time.Duration
+
 	// Callback function that should perform the authentication of the user based on userId and
 	// password. Must return true on success, false on failure. Required.
 	// Option return user id, if so, user id will be stored in Claim Array.
@@ -167,6 +173,9 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 	expire := time.Now().Add(mw.Timeout)
 	token.Claims["id"] = userId
 	token.Claims["exp"] = expire.Unix()
+	if mw.MaxRefresh != 0 {
+		token.Claims["orig_iat"] = time.Now().Unix()
+	}
 	tokenString, err := token.SignedString(mw.Key)
 
 	if err != nil {
@@ -186,6 +195,13 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 	token, _ := mw.parseToken(c)
 
+	origIat := int64(token.Claims["orig_iat"].(float64))
+
+	if origIat < time.Now().Add(-mw.MaxRefresh).Unix() {
+		mw.unauthorized(c, http.StatusUnauthorized, "Token is expired.")
+		return
+	}
+
 	// Create the token
 	newToken := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))
 
@@ -196,6 +212,7 @@ func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 	expire := time.Now().Add(mw.Timeout)
 	newToken.Claims["id"] = token.Claims["id"]
 	newToken.Claims["exp"] = expire.Unix()
+	newToken.Claims["orig_iat"] = origIat
 	tokenString, err := newToken.SignedString(mw.Key)
 
 	if err != nil {

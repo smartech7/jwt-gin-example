@@ -212,6 +212,7 @@ func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 	expire := time.Now().Add(mw.Timeout)
 	newToken.Claims["id"] = token.Claims["id"]
 	newToken.Claims["exp"] = expire.Unix()
+	newToken.Claims["orig_iat"] = origIat
 	tokenString, err := newToken.SignedString(mw.Key)
 
 	if err != nil {

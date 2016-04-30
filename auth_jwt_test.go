@@ -302,6 +302,41 @@ func TestRefreshHandler(t *testing.T) {
 		})
 }
 
+func TestExpriedTokenOnRefreshHandler(t *testing.T) {
+	// the middleware to test
+	authMiddleware := &GinJWTMiddleware{
+		Realm:      "test zone",
+		Key:        key,
+		Timeout:    time.Hour,
+		MaxRefresh: 0,
+		Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
+			if userId == "admin" && password == "admin" {
+				return userId, true
+			}
+
+			return userId, false
+		},
+	}
+
+	handler := ginHandler(authMiddleware)
+
+	r := gofight.New()
+
+	token := jwt.New(jwt.GetSigningMethod("HS256"))
+	token.Claims["id"] = "admin"
+	token.Claims["exp"] = time.Now().Add(time.Hour).Unix()
+	token.Claims["orig_iat"] = 0
+	tokenString, _ := token.SignedString(key)
+
+	r.GET("/auth/refresh_token").
+		SetHeader(gofight.H{
+			"Authorization": "Bearer " + tokenString,
+		}).
+		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, http.StatusUnauthorized, r.Code)
+		})
+}
+
 func TestAuthorizator(t *testing.T) {
 	// the middleware to test
 	authMiddleware := &GinJWTMiddleware{

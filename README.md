@@ -8,8 +8,16 @@ It uses [jwt-go](https://github.com/dgrijalva/jwt-go) to provide a jwt authentic
 
 ## Install
 
+Install `v1.x.x` version if `jwt-go` using [v2](http://gopkg.in/dgrijalva/jwt-go.v2) version. To get the package, execute:
+
 ```bash
-$ go get -u https://github.com/appleboy/gin-jwt
+$ go get gopkg.in/appleboy/gin-jwt.v1
+```
+
+To import this package, add the following line to your code:
+
+```go
+import "gopkg.in/appleboy/gin-jwt.v1"
 ```
 
 ## Example

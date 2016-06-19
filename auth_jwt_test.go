@@ -3,9 +3,9 @@ package jwt
 import (
 	"github.com/appleboy/gofight"
 	"github.com/buger/jsonparser"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/dgrijalva/jwt-go.v2"
 	"net/http"
 	"net/http/httptest"
 	"testing"

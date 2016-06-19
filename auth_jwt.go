@@ -2,8 +2,8 @@ package jwt
 
 import (
 	"errors"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/dgrijalva/jwt-go.v2"
 	"log"
 	"net/http"
 	"strings"

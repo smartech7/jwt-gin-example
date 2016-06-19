@@ -28,7 +28,7 @@ Please see [server example file](example/server.go).
 package main
 
 import (
-  "github.com/appleboy/gin-jwt"
+  "gopkg.in/appleboy/gin-jwt.v1"
   "github.com/fvbock/endless"
   "github.com/gin-gonic/gin"
   "os"

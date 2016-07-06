@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/appleboy/gin-jwt"
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/appleboy/gin-jwt.v1"
 	"os"
 	"time"
 )
@@ -26,9 +26,10 @@ func main() {
 
 	// the jwt middleware
 	authMiddleware := &jwt.GinJWTMiddleware{
-		Realm:   "test zone",
-		Key:     []byte("secret key"),
-		Timeout: time.Hour,
+		Realm:      "test zone",
+		Key:        []byte("secret key"),
+		Timeout:    time.Hour,
+		MaxRefresh: time.Hour,
 		Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
 			if (userId == "admin" && password == "admin") || (userId == "test" && password == "test") {
 				return userId, true

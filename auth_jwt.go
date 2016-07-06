@@ -173,9 +173,8 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 	expire := time.Now().Add(mw.Timeout)
 	token.Claims["id"] = userId
 	token.Claims["exp"] = expire.Unix()
-	if mw.MaxRefresh != 0 {
-		token.Claims["orig_iat"] = time.Now().Unix()
-	}
+	token.Claims["orig_iat"] = time.Now().Unix()
+
 	tokenString, err := token.SignedString(mw.Key)
 
 	if err != nil {
@@ -213,6 +212,7 @@ func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 	newToken.Claims["id"] = token.Claims["id"]
 	newToken.Claims["exp"] = expire.Unix()
 	newToken.Claims["orig_iat"] = origIat
+
 	tokenString, err := newToken.SignedString(mw.Key)
 
 	if err != nil {
@@ -251,6 +251,7 @@ func (mw *GinJWTMiddleware) TokenGenerator(userID string) string {
 
 	token.Claims["id"] = userID
 	token.Claims["exp"] = time.Now().Add(mw.Timeout).Unix()
+	token.Claims["orig_iat"] = time.Now().Unix()
 
 	tokenString, _ := token.SignedString(mw.Key)
 

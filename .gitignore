@@ -24,4 +24,4 @@ _testmain.go
 *.prof
 .DS_Store
 gin-bin
-coverage.out
+coverage.txt

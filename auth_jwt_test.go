@@ -550,3 +550,36 @@ func TestUnauthorized(t *testing.T) {
 			assert.Equal(t, http.StatusUnauthorized, r.Code)
 		})
 }
+
+func TestTokenExpire(t *testing.T) {
+	// the middleware to test
+	authMiddleware := &GinJWTMiddleware{
+		Realm:      "test zone",
+		Key:        key,
+		Timeout:    time.Hour,
+		MaxRefresh: -time.Second,
+		Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
+			if userId == "admin" && password == "admin" {
+				return userId, true
+			}
+			return userId, false
+		},
+		Unauthorized: func(c *gin.Context, code int, message string) {
+			c.String(code, message)
+		},
+	}
+
+	handler := ginHandler(authMiddleware)
+
+	r := gofight.New()
+
+	userToken := authMiddleware.TokenGenerator("admin")
+
+	r.GET("/auth/refresh_token").
+		SetHeader(gofight.H{
+			"Authorization": "Bearer " + userToken,
+		}).
+		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, http.StatusUnauthorized, r.Code)
+		})
+}

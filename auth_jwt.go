@@ -251,6 +251,7 @@ func (mw *GinJWTMiddleware) TokenGenerator(userID string) string {
 
 	token.Claims["id"] = userID
 	token.Claims["exp"] = time.Now().Add(mw.Timeout).Unix()
+	token.Claims["orig_iat"] = time.Now().Unix()
 
 	tokenString, _ := token.SignedString(mw.Key)
 

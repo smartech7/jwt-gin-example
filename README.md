@@ -8,7 +8,23 @@ It uses [jwt-go](https://github.com/dgrijalva/jwt-go) to provide a jwt authentic
 
 ## Install
 
-Install gin-gwt [v1](http://gopkg.in/appleboy/gin-jwt.v1) version if `jwt-go` using [v2](http://gopkg.in/dgrijalva/jwt-go.v2) version. To get the package, execute:
+### v2 version
+
+Install gin-gwt [v2](http://gopkg.in/appleboy/gin-jwt.v2) version for `jwt-go` [v3](http://gopkg.in/dgrijalva/jwt-go.v3) version. To get the package, execute:
+
+```bash
+$ go get gopkg.in/appleboy/gin-jwt.v2
+```
+
+To import this package, add the following line to your code:
+
+```go
+import "gopkg.in/appleboy/gin-jwt.v2"
+```
+
+### v1 version
+
+Install gin-gwt [v1](http://gopkg.in/appleboy/gin-jwt.v1) version for `jwt-go` [v2](http://gopkg.in/dgrijalva/jwt-go.v2) version. To get the package, execute:
 
 ```bash
 $ go get gopkg.in/appleboy/gin-jwt.v1
@@ -28,7 +44,7 @@ Please see [server example file](example/server.go).
 package main
 
 import (
-  "gopkg.in/appleboy/gin-jwt.v1"
+  "gopkg.in/appleboy/gin-jwt.v2"
   "github.com/fvbock/endless"
   "github.com/gin-gonic/gin"
   "os"

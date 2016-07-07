@@ -3,7 +3,7 @@ package jwt
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/dgrijalva/jwt-go.v2"
+	"gopkg.in/dgrijalva/jwt-go.v3"
 	"log"
 	"net/http"
 	"strings"
@@ -123,8 +123,10 @@ func (mw *GinJWTMiddleware) middlewareImpl(c *gin.Context) {
 		return
 	}
 
-	id := token.Claims["id"].(string)
-	c.Set("JWT_PAYLOAD", token.Claims)
+	claims := token.Claims.(jwt.MapClaims)
+
+	id := claims["id"].(string)
+	c.Set("JWT_PAYLOAD", claims)
 	c.Set("userID", id)
 
 	if !mw.Authorizator(id, c) {
@@ -159,10 +161,11 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 
 	// Create the token
 	token := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))
+	claims := token.Claims.(jwt.MapClaims)
 
 	if mw.PayloadFunc != nil {
 		for key, value := range mw.PayloadFunc(loginVals.Username) {
-			token.Claims[key] = value
+			claims[key] = value
 		}
 	}
 
@@ -171,9 +174,9 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 	}
 
 	expire := time.Now().Add(mw.Timeout)
-	token.Claims["id"] = userId
-	token.Claims["exp"] = expire.Unix()
-	token.Claims["orig_iat"] = time.Now().Unix()
+	claims["id"] = userId
+	claims["exp"] = expire.Unix()
+	claims["orig_iat"] = time.Now().Unix()
 
 	tokenString, err := token.SignedString(mw.Key)
 
@@ -193,8 +196,9 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 // Reply will be of the form {"token": "TOKEN"}.
 func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 	token, _ := mw.parseToken(c)
+	claims := token.Claims.(jwt.MapClaims)
 
-	origIat := int64(token.Claims["orig_iat"].(float64))
+	origIat := int64(claims["orig_iat"].(float64))
 
 	if origIat < time.Now().Add(-mw.MaxRefresh).Unix() {
 		mw.unauthorized(c, http.StatusUnauthorized, "Token is expired.")
@@ -203,15 +207,16 @@ func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 
 	// Create the token
 	newToken := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))
+	newClaims := newToken.Claims.(jwt.MapClaims)
 
-	for key := range token.Claims {
-		newToken.Claims[key] = token.Claims[key]
+	for key := range claims {
+		newClaims[key] = claims[key]
 	}
 
 	expire := time.Now().Add(mw.Timeout)
-	newToken.Claims["id"] = token.Claims["id"]
-	newToken.Claims["exp"] = expire.Unix()
-	newToken.Claims["orig_iat"] = origIat
+	newClaims["id"] = claims["id"]
+	newClaims["exp"] = expire.Unix()
+	newClaims["orig_iat"] = origIat
 
 	tokenString, err := newToken.SignedString(mw.Key)
 
@@ -227,31 +232,32 @@ func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 }
 
 // ExtractClaims help to extract the JWT claims
-func ExtractClaims(c *gin.Context) map[string]interface{} {
+func ExtractClaims(c *gin.Context) jwt.MapClaims {
 
 	if _, exists := c.Get("JWT_PAYLOAD"); !exists {
-		emptyClaims := make(map[string]interface{})
+		emptyClaims := make(jwt.MapClaims)
 		return emptyClaims
 	}
 
 	jwtClaims, _ := c.Get("JWT_PAYLOAD")
 
-	return jwtClaims.(map[string]interface{})
+	return jwtClaims.(jwt.MapClaims)
 }
 
 // TokenGenerator handler that clients can use to get a jwt token.
 func (mw *GinJWTMiddleware) TokenGenerator(userID string) string {
 	token := jwt.New(jwt.GetSigningMethod(mw.SigningAlgorithm))
+	claims := token.Claims.(jwt.MapClaims)
 
 	if mw.PayloadFunc != nil {
 		for key, value := range mw.PayloadFunc(userID) {
-			token.Claims[key] = value
+			claims[key] = value
 		}
 	}
 
-	token.Claims["id"] = userID
-	token.Claims["exp"] = time.Now().Add(mw.Timeout).Unix()
-	token.Claims["orig_iat"] = time.Now().Unix()
+	claims["id"] = userID
+	claims["exp"] = time.Now().Add(mw.Timeout).Unix()
+	claims["orig_iat"] = time.Now().Unix()
 
 	tokenString, _ := token.SignedString(mw.Key)
 

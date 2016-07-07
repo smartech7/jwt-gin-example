@@ -5,7 +5,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/dgrijalva/jwt-go.v2"
+	"gopkg.in/dgrijalva/jwt-go.v3"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,10 +23,12 @@ func makeTokenString(SigningAlgorithm string, username string) string {
 	}
 
 	token := jwt.New(jwt.GetSigningMethod(SigningAlgorithm))
-	token.Claims["id"] = username
-	token.Claims["exp"] = time.Now().Add(time.Hour).Unix()
-	token.Claims["orig_iat"] = time.Now().Unix()
+	claims := token.Claims.(jwt.MapClaims)
+	claims["id"] = username
+	claims["exp"] = time.Now().Add(time.Hour).Unix()
+	claims["orig_iat"] = time.Now().Unix()
 	tokenString, _ := token.SignedString(key)
+
 	return tokenString
 }
 
@@ -322,9 +324,10 @@ func TestExpriedTokenOnRefreshHandler(t *testing.T) {
 	r := gofight.New()
 
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
-	token.Claims["id"] = "admin"
-	token.Claims["exp"] = time.Now().Add(time.Hour).Unix()
-	token.Claims["orig_iat"] = 0
+	claims := token.Claims.(jwt.MapClaims)
+	claims["id"] = "admin"
+	claims["exp"] = time.Now().Add(time.Hour).Unix()
+	claims["orig_iat"] = 0
 	tokenString, _ := token.SignedString(key)
 
 	r.GET("/auth/refresh_token").

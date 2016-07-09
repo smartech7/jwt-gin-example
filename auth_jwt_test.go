@@ -1,10 +1,10 @@
 package jwt
 
 import (
-	"github.com/appleboy/gofight"
 	"github.com/buger/jsonparser"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/appleboy/gofight.v1"
 	"gopkg.in/dgrijalva/jwt-go.v3"
 	"net/http"
 	"net/http/httptest"
@@ -50,7 +50,7 @@ func TestMissingRealm(t *testing.T) {
 	err := authMiddleware.MiddlewareInit()
 
 	assert.Error(t, err)
-	assert.Equal(t, "Realm is required", err.Error())
+	assert.Equal(t, "realm is required", err.Error())
 }
 
 func TestMissingAuthenticator(t *testing.T) {
@@ -65,7 +65,7 @@ func TestMissingAuthenticator(t *testing.T) {
 	err := authMiddleware.MiddlewareInit()
 
 	assert.Error(t, err)
-	assert.Equal(t, "Authenticator is required", err.Error())
+	assert.Equal(t, "authenticator is required", err.Error())
 }
 
 func TestMissingKey(t *testing.T) {
@@ -86,7 +86,7 @@ func TestMissingKey(t *testing.T) {
 	err := authMiddleware.MiddlewareInit()
 
 	assert.Error(t, err)
-	assert.Equal(t, "Key is required", err.Error())
+	assert.Equal(t, "secret key is required", err.Error())
 }
 
 func TestMissingTimeOut(t *testing.T) {

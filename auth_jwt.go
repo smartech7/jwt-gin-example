@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/dgrijalva/jwt-go.v3"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -65,17 +64,6 @@ type Login struct {
 
 // MiddlewareInit initialize jwt configs.
 func (mw *GinJWTMiddleware) MiddlewareInit() error {
-	if mw.Realm == "" {
-		return errors.New("realm is required")
-	}
-
-	if mw.Authenticator == nil {
-		return errors.New("authenticator is required")
-	}
-
-	if mw.Key == nil {
-		return errors.New("secret key is required")
-	}
 
 	if mw.SigningAlgorithm == "" {
 		mw.SigningAlgorithm = "HS256"
@@ -100,13 +88,28 @@ func (mw *GinJWTMiddleware) MiddlewareInit() error {
 		}
 	}
 
+	if mw.Realm == "" {
+		return errors.New("realm is required")
+	}
+
+	if mw.Authenticator == nil {
+		return errors.New("authenticator is required")
+	}
+
+	if mw.Key == nil {
+		return errors.New("secret key is required")
+	}
+
 	return nil
 }
 
 // MiddlewareFunc makes GinJWTMiddleware implement the Middleware interface.
 func (mw *GinJWTMiddleware) MiddlewareFunc() gin.HandlerFunc {
 	if err := mw.MiddlewareInit(); err != nil {
-		log.Fatal(err.Error())
+		return func(c *gin.Context) {
+			mw.unauthorized(c, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	return func(c *gin.Context) {
@@ -286,6 +289,11 @@ func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 }
 
 func (mw *GinJWTMiddleware) unauthorized(c *gin.Context, code int, message string) {
+
+	if mw.Realm == "" {
+		mw.Realm = "gin jwt"
+	}
+
 	c.Header("WWW-Authenticate", "JWT realm="+mw.Realm)
 	c.Abort()
 

@@ -66,15 +66,15 @@ type Login struct {
 // MiddlewareInit initialize jwt configs.
 func (mw *GinJWTMiddleware) MiddlewareInit() error {
 	if mw.Realm == "" {
-		return errors.New("Realm is required")
+		return errors.New("realm is required")
 	}
 
 	if mw.Authenticator == nil {
-		return errors.New("Authenticator is required")
+		return errors.New("authenticator is required")
 	}
 
 	if mw.Key == nil {
-		return errors.New("Key is required")
+		return errors.New("secret key is required")
 	}
 
 	if mw.SigningAlgorithm == "" {
@@ -268,17 +268,17 @@ func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 	authHeader := c.Request.Header.Get("Authorization")
 
 	if authHeader == "" {
-		return nil, errors.New("Auth header empty")
+		return nil, errors.New("auth header empty")
 	}
 
 	parts := strings.SplitN(authHeader, " ", 2)
 	if !(len(parts) == 2 && parts[0] == "Bearer") {
-		return nil, errors.New("Invalid auth header")
+		return nil, errors.New("invalid auth header")
 	}
 
 	return jwt.Parse(parts[1], func(token *jwt.Token) (interface{}, error) {
 		if jwt.GetSigningMethod(mw.SigningAlgorithm) != token.Method {
-			return nil, errors.New("Invalid signing algorithm")
+			return nil, errors.New("invalid signing algorithm")
 		}
 
 		return mw.Key, nil

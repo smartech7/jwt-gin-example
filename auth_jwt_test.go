@@ -130,6 +130,25 @@ func ginHandler(auth *GinJWTMiddleware) *gin.Engine {
 	return r
 }
 
+func TestInternalServerError(t *testing.T) {
+	// the middleware to test
+	authMiddleware := &GinJWTMiddleware{}
+
+	handler := ginHandler(authMiddleware)
+
+	r := gofight.New()
+
+	r.GET("/auth/hello").
+		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			data := []byte(r.Body.String())
+
+			message, _ := jsonparser.GetString(data, "message")
+
+			assert.Equal(t, "realm is required", message)
+			assert.Equal(t, http.StatusInternalServerError, r.Code)
+		})
+}
+
 func TestLoginHandler(t *testing.T) {
 
 	// the middleware to test

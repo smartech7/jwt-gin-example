@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func HelloHandler(c *gin.Context) {
+func helloHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"text": "Hello World.",
 	})
@@ -57,7 +57,7 @@ func main() {
 	auth := r.Group("/auth")
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{
-		auth.GET("/hello", HelloHandler)
+		auth.GET("/hello", helloHandler)
 		auth.GET("/refresh_token", authMiddleware.RefreshHandler)
 	}
 

@@ -10,8 +10,8 @@ import (
 )
 
 // GinJWTMiddleware provides a Json-Web-Token authentication implementation. On failure, a 401 HTTP response
-// is returned. On success, the wrapped middleware is called, and the userId is made available as
-// c.Get("userId").(string).
+// is returned. On success, the wrapped middleware is called, and the userID is made available as
+// c.Get("userID").(string).
 // Users can get a token by posting a json request to LoginHandler. The token then needs to be passed in
 // the Authentication header. Example: Authorization:Bearer XXX_TOKEN_XXX#!/usr/bin/env
 type GinJWTMiddleware struct {
@@ -34,15 +34,15 @@ type GinJWTMiddleware struct {
 	// Optional, defaults to 0 meaning not refreshable.
 	MaxRefresh time.Duration
 
-	// Callback function that should perform the authentication of the user based on userId and
+	// Callback function that should perform the authentication of the user based on userID and
 	// password. Must return true on success, false on failure. Required.
 	// Option return user id, if so, user id will be stored in Claim Array.
-	Authenticator func(userId string, password string, c *gin.Context) (string, bool)
+	Authenticator func(userID string, password string, c *gin.Context) (string, bool)
 
 	// Callback function that should perform the authorization of the authenticated user. Called
 	// only after an authentication success. Must return true on success, false on failure.
 	// Optional, default to success.
-	Authorizator func(userId string, c *gin.Context) bool
+	Authorizator func(userID string, c *gin.Context) bool
 
 	// Callback function that will be called during login.
 	// Using this function it is possible to add additional payload data to the webtoken.
@@ -50,7 +50,7 @@ type GinJWTMiddleware struct {
 	// Note that the payload is not encrypted.
 	// The attributes mentioned on jwt.io can't be used as keys for the map.
 	// Optional, by default no additional data will be set.
-	PayloadFunc func(userId string) map[string]interface{}
+	PayloadFunc func(userID string) map[string]interface{}
 
 	// User can define own Unauthorized func.
 	Unauthorized func(*gin.Context, int, string)
@@ -74,7 +74,7 @@ func (mw *GinJWTMiddleware) MiddlewareInit() error {
 	}
 
 	if mw.Authorizator == nil {
-		mw.Authorizator = func(userId string, c *gin.Context) bool {
+		mw.Authorizator = func(userID string, c *gin.Context) bool {
 			return true
 		}
 	}
@@ -155,7 +155,7 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	userId, ok := mw.Authenticator(loginVals.Username, loginVals.Password, c)
+	userID, ok := mw.Authenticator(loginVals.Username, loginVals.Password, c)
 
 	if !ok {
 		mw.unauthorized(c, http.StatusUnauthorized, "Incorrect Username / Password")
@@ -172,12 +172,12 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 		}
 	}
 
-	if userId == "" {
-		userId = loginVals.Username
+	if userID == "" {
+		userID = loginVals.Username
 	}
 
 	expire := time.Now().Add(mw.Timeout)
-	claims["id"] = userId
+	claims["id"] = userID
 	claims["exp"] = expire.Unix()
 	claims["orig_iat"] = time.Now().Unix()
 

@@ -1,0 +1,11 @@
+pipeline:
+  build:
+    image: appleboy/golang-testing
+    environment:
+      - GOPATH=/go
+    commands:
+      - make install
+      - coverage all
+
+workspace:
+  path: /go/src/github.com/appleboy/gin-jwt

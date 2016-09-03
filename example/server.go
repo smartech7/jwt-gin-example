@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/appleboy/gin-jwt"
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/appleboy/gin-jwt.v2"
 	"os"
 	"time"
 )

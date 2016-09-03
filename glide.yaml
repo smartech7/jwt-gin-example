@@ -3,6 +3,7 @@ import:
 - package: github.com/fvbock/endless
 - package: github.com/gin-gonic/gin
 - package: gopkg.in/dgrijalva/jwt-go.v3
+- package: gopkg.in/appleboy/gin-jwt.v2
 testImport:
 - package: github.com/buger/jsonparser
 - package: github.com/stretchr/testify

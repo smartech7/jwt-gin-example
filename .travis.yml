@@ -24,8 +24,8 @@ install:
   - make install
 
 script:
-  - go test -v -cover -coverprofile=.cover/coverage.txt
-  - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=.cover/coverage.txt -service=travis-ci -repotoken=$COVERALLS_TOKEN
+  - go test -v -cover -coverprofile=coverage.txt
+  - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.txt -service=travis-ci -repotoken=$COVERALLS_TOKEN
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash) -f .cover/coverage.txt
+  - bash <(curl -s https://codecov.io/bash) -f coverage.txt

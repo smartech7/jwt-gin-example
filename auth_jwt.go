@@ -54,6 +54,15 @@ type GinJWTMiddleware struct {
 
 	// User can define own Unauthorized func.
 	Unauthorized func(*gin.Context, int, string)
+
+	// TokenLookup is a string in the form of "<source>:<name>" that is used
+	// to extract token from the request.
+	// Optional. Default value "header:Authorization".
+	// Possible values:
+	// - "header:<name>"
+	// - "query:<name>"
+	// - "cookie:<name>"
+	TokenLookup string
 }
 
 // Login form structure.
@@ -64,6 +73,10 @@ type Login struct {
 
 // MiddlewareInit initialize jwt configs.
 func (mw *GinJWTMiddleware) MiddlewareInit() error {
+
+	if mw.TokenLookup == "" {
+		mw.TokenLookup = "header:Authorization"
+	}
 
 	if mw.SigningAlgorithm == "" {
 		mw.SigningAlgorithm = "HS256"
@@ -267,19 +280,40 @@ func (mw *GinJWTMiddleware) TokenGenerator(userID string) string {
 	return tokenString
 }
 
-func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
+func (mw *GinJWTMiddleware) jwtFromHeader(c *gin.Context, key string) (string, error) {
 	authHeader := c.Request.Header.Get("Authorization")
 
 	if authHeader == "" {
-		return nil, errors.New("auth header empty")
+		return "", errors.New("auth header empty")
 	}
 
 	parts := strings.SplitN(authHeader, " ", 2)
 	if !(len(parts) == 2 && parts[0] == "Bearer") {
-		return nil, errors.New("invalid auth header")
+		return "", errors.New("invalid auth header")
 	}
 
-	return jwt.Parse(parts[1], func(token *jwt.Token) (interface{}, error) {
+	return parts[1], nil
+}
+
+func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
+	var token string
+	var err error
+
+	parts := strings.Split(mw.TokenLookup, ":")
+	switch parts[0] {
+	case "header":
+		token, err = mw.jwtFromHeader(c, parts[1])
+		// case "query":
+		// 	token, err = jwtFromQuery(parts[1])
+		// case "cookie":
+		// 	token, err = jwtFromCookie(parts[1])
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if jwt.GetSigningMethod(mw.SigningAlgorithm) != token.Method {
 			return nil, errors.New("invalid signing algorithm")
 		}

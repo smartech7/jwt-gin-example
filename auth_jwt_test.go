@@ -108,6 +108,25 @@ func TestMissingTimeOut(t *testing.T) {
 	assert.Equal(t, time.Hour, authMiddleware.Timeout)
 }
 
+func TestMissingTokenLookup(t *testing.T) {
+
+	authMiddleware := &GinJWTMiddleware{
+		Realm: "test zone",
+		Key:   key,
+		Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
+			if userId == "admin" && password == "admin" {
+				return "", true
+			}
+
+			return "", false
+		},
+	}
+
+	authMiddleware.MiddlewareInit()
+
+	assert.Equal(t, "header:Authorization", authMiddleware.TokenLookup)
+}
+
 func helloHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"text": "Hello World.",

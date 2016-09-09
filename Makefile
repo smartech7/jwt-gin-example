@@ -9,7 +9,7 @@ update:
 	glide up
 
 test:
-	go test -v -cover .
+	go test -v -cover -coverprofile=.cover/coverage.txt
 
 html:
 	go tool cover -html=.cover/coverage.txt

@@ -281,7 +281,7 @@ func (mw *GinJWTMiddleware) TokenGenerator(userID string) string {
 }
 
 func (mw *GinJWTMiddleware) jwtFromHeader(c *gin.Context, key string) (string, error) {
-	authHeader := c.Request.Header.Get("Authorization")
+	authHeader := c.Request.Header.Get(key)
 
 	if authHeader == "" {
 		return "", errors.New("auth header empty")
@@ -295,6 +295,16 @@ func (mw *GinJWTMiddleware) jwtFromHeader(c *gin.Context, key string) (string, e
 	return parts[1], nil
 }
 
+func (mw *GinJWTMiddleware) jwtFromQuery(c *gin.Context, key string) (string, error) {
+	token := c.Query(key)
+
+	if token == "" {
+		return "", errors.New("Query token empty")
+	}
+
+	return token, nil
+}
+
 func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 	var token string
 	var err error
@@ -303,8 +313,8 @@ func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 	switch parts[0] {
 	case "header":
 		token, err = mw.jwtFromHeader(c, parts[1])
-		// case "query":
-		// 	token, err = jwtFromQuery(parts[1])
+	case "query":
+		token, err = mw.jwtFromQuery(c, parts[1])
 		// case "cookie":
 		// 	token, err = jwtFromCookie(parts[1])
 	}

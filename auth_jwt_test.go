@@ -665,3 +665,44 @@ func TestTokenFromQueryString(t *testing.T) {
 			assert.Equal(t, http.StatusOK, r.Code)
 		})
 }
+
+func TestTokenFromCookieString(t *testing.T) {
+	// the middleware to test
+	authMiddleware := &GinJWTMiddleware{
+		Realm:   "test zone",
+		Key:     key,
+		Timeout: time.Hour,
+		Authenticator: func(userId string, password string, c *gin.Context) (string, bool) {
+			if userId == "admin" && password == "admin" {
+				return userId, true
+			}
+			return userId, false
+		},
+		Unauthorized: func(c *gin.Context, code int, message string) {
+			c.String(code, message)
+		},
+		TokenLookup: "cookie:token",
+	}
+
+	handler := ginHandler(authMiddleware)
+
+	r := gofight.New()
+
+	userToken := authMiddleware.TokenGenerator("admin")
+
+	r.GET("/auth/refresh_token").
+		SetHeader(gofight.H{
+			"Authorization": "Bearer " + userToken,
+		}).
+		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, http.StatusUnauthorized, r.Code)
+		})
+
+	r.GET("/auth/refresh_token").
+		SetCookie(gofight.H{
+			"token": userToken,
+		}).
+		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, http.StatusOK, r.Code)
+		})
+}

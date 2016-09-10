@@ -305,6 +305,16 @@ func (mw *GinJWTMiddleware) jwtFromQuery(c *gin.Context, key string) (string, er
 	return token, nil
 }
 
+func (mw *GinJWTMiddleware) jwtFromCookie(c *gin.Context, key string) (string, error) {
+	cookie, _ := c.Cookie(key)
+
+	if cookie == "" {
+		return "", errors.New("Cookie token empty")
+	}
+
+	return cookie, nil
+}
+
 func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 	var token string
 	var err error
@@ -315,8 +325,8 @@ func (mw *GinJWTMiddleware) parseToken(c *gin.Context) (*jwt.Token, error) {
 		token, err = mw.jwtFromHeader(c, parts[1])
 	case "query":
 		token, err = mw.jwtFromQuery(c, parts[1])
-		// case "cookie":
-		// 	token, err = jwtFromCookie(parts[1])
+	case "cookie":
+		token, err = mw.jwtFromCookie(c, parts[1])
 	}
 
 	if err != nil {

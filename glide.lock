@@ -1,8 +1,8 @@
 hash: ecf8cddfe1f399e4c46a6dc0b07da5a1202aa6d537a5dd5908311f750e7b4f3a
-updated: 2016-09-03T08:12:52.542942954+08:00
+updated: 2016-09-10T16:06:35.556904183+08:00
 imports:
 - name: github.com/fvbock/endless
-  version: 2cdc20a776897c0f406853c048c33e2c1a9f0ebf
+  version: 67d0a784ad8ab10a69d12107f6de220db0c18002
 - name: github.com/gin-gonic/gin
   version: f931d1ea80ae95a6fc739213cdd9399bd2967fb6
   subpackages:
@@ -28,26 +28,27 @@ imports:
   version: e4d366fc3c7938e2958e662b4258c7a89e1f0e3e
 testImports:
 - name: github.com/buger/jsonparser
-  version: 16b91a7a5c68f51ef0a249ef2b554a76244b475c
+  version: 8ffcad59d1149936a8d17ba2a9c0f714b47b7069
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
   - spew
 - name: github.com/labstack/echo
-  version: 579cb79a41a2e931699bad83111728d78aa11d48
+  version: 03efe4d61b73979961720b92c3cee985c29a24f2
   subpackages:
   - engine
   - test
+  - context
   - log
 - name: github.com/labstack/gommon
-  version: 445cf40e6de4cbef35daf3285ff5212c91e78262
+  version: 431777a5117c8de4352a400dad1e2a55f484b189
   subpackages:
   - log
   - color
 - name: github.com/mattn/go-colorable
-  version: 9056b7a9f2d1f2d96498d6d146acd1f9d5ed3d59
+  version: ed8eb9e318d7a84ce5915b495b7d35e0cfe7b5a8
 - name: github.com/mattn/go-isatty
-  version: 56b76bdf51f7708750eac80fa38b952bb9f32639
+  version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
 - name: github.com/pmezard/go-difflib
   version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:
@@ -59,8 +60,8 @@ testImports:
 - name: github.com/valyala/fasttemplate
   version: 3b874956e03f1636d171bda64b130f9135f42cff
 - name: golang.org/x/sys
-  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  version: 30de6d19a3bd89a5f38ae4028e23aaa5582648af
   subpackages:
   - unix
 - name: gopkg.in/appleboy/gofight.v1
-  version: 1a36a6d5ab10fba252a9cbecb1bcb72f9a2e6770
+  version: 3efeef2c2c3ce4e639346c347b65171e419b2ebc

@@ -1,11 +1,16 @@
 pipeline:
   build:
-    image: appleboy/golang-testing
+    image: golang:${GO_VERSION}
     environment:
       - GOPATH=/go
     commands:
-      - make install
-      - coverage all
+      - go get -d -t -v
+      - go test -v
 
 workspace:
   path: /go/src/github.com/appleboy/gin-jwt
+
+matrix:
+  GO_VERSION:
+    - 1.6.3
+    - 1.7.1

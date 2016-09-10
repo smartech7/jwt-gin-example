@@ -93,6 +93,16 @@ func main() {
         "message": message,
       })
     },
+    // TokenLookup is a string in the form of "<source>:<name>" that is used
+    // to extract token from the request.
+    // Optional. Default value "header:Authorization".
+    // Possible values:
+    // - "header:<name>"
+    // - "query:<name>"
+    // - "cookie:<name>"
+    TokenLookup: "header:Authorization",
+    // TokenLookup: "query:token",
+    // TokenLookup: "cookie:token",
   }
 
   r.POST("/login", authMiddleware.LoginHandler)

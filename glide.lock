@@ -1,5 +1,5 @@
 hash: ecf8cddfe1f399e4c46a6dc0b07da5a1202aa6d537a5dd5908311f750e7b4f3a
-updated: 2016-09-10T16:06:35.556904183+08:00
+updated: 2016-09-22T11:07:53.927198565+08:00
 imports:
 - name: github.com/fvbock/endless
   version: 67d0a784ad8ab10a69d12107f6de220db0c18002
@@ -19,13 +19,13 @@ imports:
   subpackages:
   - context
 - name: gopkg.in/appleboy/gin-jwt.v2
-  version: 7dd16c9587c51fc9f41ad9930f1cfff236377a86
+  version: 89be89cdc6ee002b5c9b95fb57963ad7e746a82c
 - name: gopkg.in/dgrijalva/jwt-go.v3
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: gopkg.in/go-playground/validator.v8
   version: c193cecd124b5cc722d7ee5538e945bdb3348435
 - name: gopkg.in/yaml.v2
-  version: e4d366fc3c7938e2958e662b4258c7a89e1f0e3e
+  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
 testImports:
 - name: github.com/buger/jsonparser
   version: 8ffcad59d1149936a8d17ba2a9c0f714b47b7069
@@ -34,7 +34,7 @@ testImports:
   subpackages:
   - spew
 - name: github.com/labstack/echo
-  version: 03efe4d61b73979961720b92c3cee985c29a24f2
+  version: 04f45046b1ebb56690836391fe26f6f1187788b7
   subpackages:
   - engine
   - test
@@ -60,7 +60,7 @@ testImports:
 - name: github.com/valyala/fasttemplate
   version: 3b874956e03f1636d171bda64b130f9135f42cff
 - name: golang.org/x/sys
-  version: 30de6d19a3bd89a5f38ae4028e23aaa5582648af
+  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
   subpackages:
   - unix
 - name: gopkg.in/appleboy/gofight.v1

@@ -1,11 +1,26 @@
 pipeline:
+
+  restore_cache:
+    image: appleboy/drone-sftp-cache
+    restore: true
+    mount: [ .glide, vendor ]
+    ignore_branch: true
+
   build:
-    image: golang:${GO_VERSION}
+    image: appleboy/golang-testing:${GO_VERSION}
     environment:
       - GOPATH=/go
     commands:
-      - go get -d -t -v
-      - go test -v
+      - make install
+      - coverage all
+
+  rebuild_cache:
+    image: appleboy/drone-sftp-cache
+    rebuild: true
+    mount: [ .glide, vendor ]
+    ignore_branch: true
+    when:
+      branch: master
 
 workspace:
   path: /go/src/github.com/appleboy/gin-jwt

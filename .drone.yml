@@ -14,6 +14,20 @@ pipeline:
       - make install
       - coverage all
 
+  line:
+    image: appleboy/drone-line
+    pull: true
+    to: u359650f919427b5229330c7205c47ee4
+    when:
+      status: [ success, failure ]
+
+  facebook:
+    image: appleboy/drone-facebook
+    pull: true
+    to: 1234973386524610
+    when:
+      status: [ success, failure ]
+
   rebuild_cache:
     image: appleboy/drone-sftp-cache
     rebuild: true

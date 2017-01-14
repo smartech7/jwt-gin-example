@@ -39,3 +39,4 @@ coverage:
 
 clean:
 	rm -rf .cover
+	find . -name "coverage.txt"

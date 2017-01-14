@@ -2,9 +2,6 @@ sudo: false
 
 language: go
 
-services:
-  - docker
-
 go:
   - 1.6.x
   - 1.7.x

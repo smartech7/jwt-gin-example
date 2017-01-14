@@ -35,7 +35,7 @@ lint:
 coverage:
 	curl -s https://codecov.io/bash > .codecov && \
 	chmod +x .codecov && \
-	./.codecov -f coverage.txt
+	./.codecov -f .cover/coverage.txt
 
 clean:
 	rm -rf .cover

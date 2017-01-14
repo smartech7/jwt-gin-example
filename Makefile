@@ -1,6 +1,6 @@
 .PHONY: test
 
-export PROJECT_PATH = /go/src/github.com/appleboy/gin-jwt
+PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 install:
 	glide install
@@ -9,17 +9,33 @@ update:
 	glide up
 
 test:
-	go test -v -cover -coverprofile=.cover/coverage.txt
+	for PKG in $(PACKAGES); do go test -v -cover -coverprofile $$GOPATH/src/$$PKG/coverage.txt $$PKG || exit 1; done;
 
 html:
 	go tool cover -html=.cover/coverage.txt
 
-docker_test: clean
-	docker run --rm \
-		-v $(PWD):$(PROJECT_PATH) \
-		-w=$(PROJECT_PATH) \
-		appleboy/golang-testing \
-		sh -c "make install && coverage all"
+fmt:
+	find . -name "*.go" -type f -not -path "./vendor/*" | xargs gofmt -s -w
+
+vet:
+	go vet $(PACKAGES)
+
+errcheck:
+	@which errcheck > /dev/null; if [ $$? -ne 0 ]; then \
+		go get -u github.com/kisielk/errcheck; \
+	fi
+	errcheck $(PACKAGES)
+
+lint:
+	@which golint > /dev/null; if [ $$? -ne 0 ]; then \
+		go get -u github.com/golang/lint/golint; \
+	fi
+	for PKG in $(PACKAGES); do golint -set_exit_status $$PKG || exit 1; done;
+
+coverage:
+	curl -s https://codecov.io/bash > .codecov && \
+	chmod +x .codecov && \
+	./.codecov -f coverage.txt
 
 clean:
 	rm -rf .cover

@@ -1,5 +1,4 @@
 pipeline:
-
   restore_cache:
     image: appleboy/drone-sftp-cache
     restore: true
@@ -12,7 +11,10 @@ pipeline:
       - GOPATH=/go
     commands:
       - make install
+      - make vet
+      - make lint
       - coverage all
+      - make coverage
 
   line:
     image: appleboy/drone-line

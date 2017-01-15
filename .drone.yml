@@ -1,6 +1,7 @@
 pipeline:
   restore_cache:
     image: appleboy/drone-sftp-cache
+    pull: true
     restore: true
     mount: [ .glide, vendor ]
     ignore_branch: true
@@ -32,6 +33,7 @@ pipeline:
 
   rebuild_cache:
     image: appleboy/drone-sftp-cache
+    pull: true
     rebuild: true
     mount: [ .glide, vendor ]
     ignore_branch: true

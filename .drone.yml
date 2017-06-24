@@ -23,7 +23,7 @@ pipeline:
     to: 1234973386524610
     secrets: [ fb_page_token, fb_verify_token ]
     when:
-      status: [ success, failure ]
+      status: [ changed, failure ]
 
 matrix:
   GO_VERSION:

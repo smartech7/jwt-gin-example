@@ -6,34 +6,18 @@ This is a middleware for [Gin](https://github.com/gin-gonic/gin) framework.
 
 It uses [jwt-go](https://github.com/dgrijalva/jwt-go) to provide a jwt authentication middleware. It provides additional handler functions to provide the `login` api that will generate the token and an additional `refresh` handler that can be used to refresh tokens.
 
-## Install
+## Usage
 
-### v2 version
+Download and install it:
 
-Install gin-jwt [v2](http://gopkg.in/appleboy/gin-jwt.v2) version for `jwt-go` [v3](http://gopkg.in/dgrijalva/jwt-go.v3) version. To get the package, execute:
-
-```bash
-$ go get gopkg.in/appleboy/gin-jwt.v2
+```sh
+$ go get github.com/appleboy/gin-jwt
 ```
 
-To import this package, add the following line to your code:
+Import it in your code:
 
 ```go
-import "gopkg.in/appleboy/gin-jwt.v2"
-```
-
-### v1 version
-
-Install gin-jwt [v1](http://gopkg.in/appleboy/gin-jwt.v1) version for `jwt-go` [v2](http://gopkg.in/dgrijalva/jwt-go.v2) version. To get the package, execute:
-
-```bash
-$ go get gopkg.in/appleboy/gin-jwt.v1
-```
-
-To import this package, add the following line to your code:
-
-```go
-import "gopkg.in/appleboy/gin-jwt.v1"
+import "github.com/appleboy/gin-jwt"
 ```
 
 ## Example

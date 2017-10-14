@@ -25,7 +25,7 @@ pipeline:
     pull: true
     secrets: [ discord_webhook_id, discord_webhook_token ]
     when:
-      status: [ changed, failure ]
+      status: [ success, failure ]
 
 matrix:
   GO_VERSION:

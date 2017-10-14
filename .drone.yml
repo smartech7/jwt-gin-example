@@ -5,14 +5,20 @@ workspace:
 pipeline:
   build:
     image: appleboy/golang-testing:${GO_VERSION}
-    secrets: [ codecov_token ]
     commands:
       - make install
       - make embedmd
       - make vet
       - make lint
       - coverage all
-      - make coverage
+
+  codecov:
+    image: robertstettner/drone-codecov
+    secrets: [ codecov_token ]
+    files:
+      - .cover/coverage.txt
+    when:
+      event: [ push, pull_request ]
 
   discord:
     image: appleboy/drone-discord

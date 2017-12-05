@@ -280,6 +280,7 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
+		"code": http.StatusOK,
 		"token":  tokenString,
 		"expire": expire.Format(time.RFC3339),
 	})
@@ -320,6 +321,7 @@ func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
+		"code": http.StatusOK,
 		"token":  tokenString,
 		"expire": expire.Format(time.RFC3339),
 	})

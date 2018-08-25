@@ -56,7 +56,7 @@ func main() {
 		},
 		Authenticator: func(c *gin.Context) (interface{}, error) {
 			var loginVals login
-			if binderr := c.Bind(&loginVals); binderr != nil {
+			if err := c.Bind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
 			userID := loginVals.Username

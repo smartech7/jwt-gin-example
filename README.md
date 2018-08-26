@@ -24,7 +24,7 @@ import "github.com/appleboy/gin-jwt"
 
 Please see [the example file](example/server.go) and you can use `ExtractClaims` to fetch user data.
 
-[embedmd]:# (example/server.go go)
+[embedmd]:# (example/basic/server.go go)
 ```go
 package main
 

@@ -379,10 +379,10 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	data, error := mw.Authenticator(c)
+	data, err := mw.Authenticator(c)
 
-	if error != nil {
-		mw.unauthorized(c, http.StatusUnauthorized, mw.HTTPStatusMessageFunc(error, c))
+	if err != nil {
+		mw.unauthorized(c, http.StatusUnauthorized, mw.HTTPStatusMessageFunc(err, c))
 		return
 	}
 

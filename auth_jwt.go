@@ -37,7 +37,7 @@ type GinJWTMiddleware struct {
 
 	// This field allows clients to refresh their token until MaxRefresh has passed.
 	// Note that clients can refresh their token in the last moment of MaxRefresh.
-	// This means that the maximum validity timespan for a token is MaxRefresh + Timeout.
+	// This means that the maximum validity timespan for a token is TokenTime + MaxRefresh.
 	// Optional, defaults to 0 meaning not refreshable.
 	MaxRefresh time.Duration
 
@@ -336,6 +336,11 @@ func (mw *GinJWTMiddleware) middlewareImpl(c *gin.Context) {
 		return
 	}
 
+	if int64(claims["exp"].(float64)) < mw.TimeFunc().Unix() {
+		mw.unauthorized(c, http.StatusUnauthorized, mw.HTTPStatusMessageFunc(ErrExpiredToken, c))
+		return
+	}
+
 	c.Set("JWT_PAYLOAD", claims)
 	identity := mw.IdentityHandler(c)
 
@@ -454,7 +459,7 @@ func (mw *GinJWTMiddleware) RefreshHandler(c *gin.Context) {
 func (mw *GinJWTMiddleware) RefreshToken(c *gin.Context) (string, time.Time, error) {
 	claims, err := mw.CheckIfTokenExpire(c)
 	if err != nil {
-		return "", time.Now(), ErrExpiredToken
+		return "", time.Now(), err
 	}
 
 	// Create the token

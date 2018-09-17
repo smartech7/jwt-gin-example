@@ -156,10 +156,11 @@ func ginHandler(auth *GinJWTMiddleware) *gin.Engine {
 	r.POST("/login", auth.LoginHandler)
 
 	group := r.Group("/auth")
+	// Refresh time can be longer than token timeout
+	group.GET("/refresh_token", auth.RefreshHandler)
 	group.Use(auth.MiddlewareFunc())
 	{
 		group.GET("/hello", helloHandler)
-		group.GET("/refresh_token", auth.RefreshHandler)
 	}
 
 	return r
@@ -977,5 +978,57 @@ func TestSendAuthorizationBool(t *testing.T) {
 			token := r.HeaderMap.Get("Authorization")
 			assert.Equal(t, "Bearer "+makeTokenString("HS256", "admin"), token)
 			assert.Equal(t, http.StatusOK, r.Code)
+		})
+}
+
+func TestExpiredTokenOnAuth(t *testing.T) {
+	// the middleware to test
+	authMiddleware, _ := New(&GinJWTMiddleware{
+		Realm:             "test zone",
+		Key:               key,
+		Timeout:           time.Hour,
+		MaxRefresh:        time.Hour * 24,
+		Authenticator:     defaultAuthenticator,
+		SendAuthorization: true,
+		Authorizator: func(data interface{}, c *gin.Context) bool {
+			return data.(string) == "admin"
+		},
+		TimeFunc: func() time.Time {
+			return time.Now().AddDate(0, 0, 1)
+		},
+	})
+
+	handler := ginHandler(authMiddleware)
+
+	r := gofight.New()
+
+	r.GET("/auth/hello").
+		SetHeader(gofight.H{
+			"Authorization": "Bearer " + makeTokenString("HS256", "admin"),
+		}).
+		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, http.StatusUnauthorized, r.Code)
+		})
+}
+
+func TestBadTokenOnRefreshHandler(t *testing.T) {
+	// the middleware to test
+	authMiddleware, _ := New(&GinJWTMiddleware{
+		Realm:         "test zone",
+		Key:           key,
+		Timeout:       time.Hour,
+		Authenticator: defaultAuthenticator,
+	})
+
+	handler := ginHandler(authMiddleware)
+
+	r := gofight.New()
+
+	r.GET("/auth/refresh_token").
+		SetHeader(gofight.H{
+			"Authorization": "Bearer " + "BadToken",
+		}).
+		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			assert.Equal(t, http.StatusUnauthorized, r.Code)
 		})
 }

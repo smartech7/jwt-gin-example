@@ -123,7 +123,7 @@ type GinJWTMiddleware struct {
 	// Disable abort() of context.
 	DisabledAbort bool
 
-	// Allow cookie domain change for development
+	// CookieName allow cookie name change for development
 	CookieName string
 }
 

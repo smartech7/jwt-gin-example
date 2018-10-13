@@ -4,13 +4,13 @@ workspace:
 
 pipeline:
   vendor:
-    image: golang:1.10
+    image: golang:1.11
     pull: true
     commands:
       - make install
 
   build:
-    image: golang:1.10
+    image: golang:1.11
     pull: true
     group: testing
     commands:
@@ -19,21 +19,21 @@ pipeline:
       - make fmt-check
 
   lint:
-    image: golang:1.10
+    image: golang:1.11
     pull: true
     group: testing
     commands:
       - make lint
 
   coverage:
-    image: golang:1.10
+    image: golang:1.11
     pull: true
     group: testing
     commands:
       - make unit-test-coverage
 
   generate-coverage:
-    image: golang:1.10
+    image: golang:1.11
     pull: true
     commands:
       - make coverage

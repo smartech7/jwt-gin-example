@@ -2,24 +2,24 @@
 
 GO ?= go
 GOFMT ?= gofmt "-s"
-PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
+PACKAGES ?= $(shell $(GO) list ./... | grep -v /vendor/)
 GOFILES := find . -name "*.go" -type f -not -path "./vendor/*"
 
 install:
 	@hash govendor > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go get -u github.com/kardianos/govendor; \
+		$(GO) get -u github.com/kardianos/govendor; \
 	fi
 	govendor sync
 
 embedmd-check:
 	@hash embedmd > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go get -u github.com/campoy/embedmd; \
+		$(GO) get -u github.com/campoy/embedmd; \
 	fi
 	embedmd -d *.md
 
 embedmd:
 	@hash embedmd > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go get -u github.com/campoy/embedmd; \
+		$(GO) get -u github.com/campoy/embedmd; \
 	fi
 	embedmd -w *.md
 
@@ -28,7 +28,6 @@ fmt:
 
 .PHONY: fmt-check
 fmt-check:
-	# get all go files and run go fmt on them
 	@files=$$($(GOFILES) | xargs $(GOFMT) -l); if [ -n "$$files" ]; then \
 		echo "Please run 'make fmt' and commit the result:"; \
 		echo "$${files}"; \
@@ -36,29 +35,29 @@ fmt-check:
 		fi;
 
 test: fmt-check
-	for PKG in $(PACKAGES); do go test -v -cover -coverprofile $$GOPATH/src/$$PKG/coverage.txt $$PKG || exit 1; done;
+	for PKG in $(PACKAGES); do $(GO) test -v -cover -coverprofile $$GOPATH/src/$$PKG/coverage.txt $$PKG || exit 1; done;
 
 html:
-	go tool cover -html=.cover/coverage.txt
+	$(GO) tool cover -html=.cover/coverage.txt
 
 vet:
-	go vet $(PACKAGES)
+	$(GO) vet $(PACKAGES)
 
 errcheck:
 	@which errcheck > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/kisielk/errcheck; \
+		$(GO) get -u github.com/kisielk/errcheck; \
 	fi
 	errcheck $(PACKAGES)
 
 lint:
 	@which golint > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/golang/lint/golint; \
+		$(GO) get -u github.com/golang/lint/golint; \
 	fi
 	for PKG in $(PACKAGES); do golint -set_exit_status $$PKG || exit 1; done;
 
 unconvert:
 	@which unconvert > /dev/null; if [ $$? -ne 0 ]; then \
-		go get -u github.com/mdempsky/unconvert; \
+		$(GO) get -u github.com/mdempsky/unconvert; \
 	fi
 	for PKG in $(PACKAGES); do unconvert -v $$PKG || exit 1; done;
 

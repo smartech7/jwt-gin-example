@@ -12,7 +12,7 @@ install:
 	govendor sync
 
 install-module:
-	go mod download
+	$(GO) mod download
 
 embedmd-check:
 	@hash embedmd > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -76,6 +76,6 @@ coverage:
 	gocovmerge $(shell find . -type f -name "coverage.out") > coverage.all;\
 
 clean:
-	go clean -modcache
+	$(GO) clean -modcache
 	rm -rf .cover
 	find . -name "coverage.txt"

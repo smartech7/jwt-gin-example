@@ -76,6 +76,6 @@ coverage:
 	gocovmerge $(shell find . -type f -name "coverage.out") > coverage.all;\
 
 clean:
-	$(GO) clean -modcache
+	$(GO) clean -modcache -cache -i
 	rm -rf .cover
-	find . -name "coverage.txt"
+	find . -name "coverage.txt" -delete

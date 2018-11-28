@@ -11,7 +11,7 @@ steps:
   commands:
   - make install-module
   - make vet
-  - make lint
+  - make revive
   - make embedmd-check
   - make fmt-check
   - make misspell-check

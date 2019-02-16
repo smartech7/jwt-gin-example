@@ -5,16 +5,15 @@ GOFMT ?= gofmt "-s"
 PACKAGES ?= $(shell $(GO) list ./...)
 GOFILES := find . -name "*.go" -type f -not -path "./vendor/*"
 
-embedmd-check:
+install-embedmd:
 	@hash embedmd > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/campoy/embedmd; \
 	fi
+
+embedmd-check: install-embedmd
 	embedmd -d *.md
 
-embedmd:
-	@hash embedmd > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		$(GO) get -u github.com/campoy/embedmd; \
-	fi
+embedmd: install-embedmd
 	embedmd -w *.md
 
 fmt:

@@ -12,9 +12,8 @@ steps:
     GO111MODULE: on
   commands:
   - make vet
-  - make revive
+  - make lint
   - make embedmd-check
-  - make fmt-check
   - make misspell-check
 
 trigger:
@@ -41,7 +40,6 @@ steps:
     GO111MODULE: on
   commands:
   - make test
-  - make coverage
 
 - name: codecov
   image: robertstettner/drone-codecov

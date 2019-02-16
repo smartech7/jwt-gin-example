@@ -3,7 +3,7 @@
 GO ?= go
 GOFMT ?= gofmt "-s"
 PACKAGES ?= $(shell $(GO) list ./...)
-GOFILES := find . -name "*.go" -type f -not -path "./vendor/*"
+GOFILES := $(shell find . -name "*.go" -type f)
 
 install-embedmd:
 	@hash embedmd > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -30,32 +30,16 @@ fmt-check:
 	fi;
 
 test: fmt-check
-	for PKG in $(PACKAGES); do $(GO) test -v -cover -coverprofile $$GOPATH/src/$$PKG/coverage.txt $$PKG || exit 1; done;
-
-html:
-	$(GO) tool cover -html=.cover/coverage.txt
+	@$(GO) test -v -cover -coverprofile coverage.txt $(PACKAGES) && echo "\n==>\033[32m Ok\033[m\n" || exit 1
 
 vet:
 	$(GO) vet $(PACKAGES)
 
-errcheck:
-	@which errcheck > /dev/null; if [ $$? -ne 0 ]; then \
-		$(GO) get -u github.com/kisielk/errcheck; \
-	fi
-	errcheck $(PACKAGES)
-
-revive:
+lint:
 	@hash revive > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/mgechev/revive; \
 	fi
-	revive -config config.toml -exclude=./vendor/... ./... || exit 1
-
-.PHONY: coverage
-coverage:
-	@hash gocovmerge > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		$(GO) get -u github.com/wadey/gocovmerge; \
-	fi
-	gocovmerge $(shell find . -type f -name "coverage.out") > coverage.all;\
+	revive -config config.toml ./... || exit 1
 
 .PHONY: misspell-check
 misspell-check:
@@ -73,5 +57,4 @@ misspell:
 
 clean:
 	$(GO) clean -modcache -cache -i
-	rm -rf .cover
 	find . -name "coverage.txt" -delete

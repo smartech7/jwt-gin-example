@@ -2,7 +2,7 @@
 
 [![GitHub tag](https://img.shields.io/github/tag/appleboy/gin-jwt.svg)](https://github.com/appleboy/gin-jwt/releases)
 [![GoDoc](https://godoc.org/github.com/appleboy/gin-jwt?status.svg)](https://godoc.org/github.com/appleboy/gin-jwt)
-[![Build Status](http://drone-new.wu-boy.com/api/badges/appleboy/gin-jwt/status.svg)](http://drone-new.wu-boy.com/appleboy/gin-jwt)
+[![Build Status](https://cloud.drone.io/api/badges/appleboy/gin-jwt/status.svg)](https://cloud.drone.io/appleboy/gin-jwt)
 [![Go Report Card](https://goreportcard.com/badge/github.com/appleboy/gin-jwt)](https://goreportcard.com/report/github.com/appleboy/gin-jwt)
 [![codecov](https://codecov.io/gh/appleboy/gin-jwt/branch/master/graph/badge.svg)](https://codecov.io/gh/appleboy/gin-jwt)
 [![codebeat badge](https://codebeat.co/badges/c4015f07-df23-4c7c-95ba-9193a12e14b1)](https://codebeat.co/projects/github-com-appleboy-gin-jwt)

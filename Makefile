@@ -2,17 +2,8 @@
 
 GO ?= go
 GOFMT ?= gofmt "-s"
-PACKAGES ?= $(shell $(GO) list ./... | grep -v /vendor/)
+PACKAGES ?= $(shell $(GO) list ./...)
 GOFILES := find . -name "*.go" -type f -not -path "./vendor/*"
-
-install:
-	@hash govendor > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		$(GO) get -u github.com/kardianos/govendor; \
-	fi
-	govendor sync
-
-install-module:
-	$(GO) mod download
 
 embedmd-check:
 	@hash embedmd > /dev/null 2>&1; if [ $$? -ne 0 ]; then \

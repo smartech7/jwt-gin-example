@@ -8,8 +8,9 @@ steps:
 - name: testing
   image: golang:1.11
   pull: true
+  environment:
+    GO111MODULE: on
   commands:
-  - make install-module
   - make vet
   - make revive
   - make embedmd-check

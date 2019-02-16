@@ -16,16 +16,18 @@ embedmd-check: install-embedmd
 embedmd: install-embedmd
 	embedmd -w *.md
 
+.PHONY: fmt
 fmt:
-	$(GOFILES) | xargs $(GOFMT) -w
+	$(GOFMT) -w $(GOFILES)
 
 .PHONY: fmt-check
 fmt-check:
-	@files=$$($(GOFILES) | xargs $(GOFMT) -l); if [ -n "$$files" ]; then \
+	@diff=$$($(GOFMT) -d $(GOFILES)); \
+	if [ -n "$$diff" ]; then \
 		echo "Please run 'make fmt' and commit the result:"; \
-		echo "$${files}"; \
+		echo "$${diff}"; \
 		exit 1; \
-		fi;
+	fi;
 
 test: fmt-check
 	for PKG in $(PACKAGES); do $(GO) test -v -cover -coverprofile $$GOPATH/src/$$PKG/coverage.txt $$PKG || exit 1; done;

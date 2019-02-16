@@ -60,16 +60,17 @@ clone:
 
 steps:
 - name: discord
+  pull: always
   image: appleboy/drone-discord
-  settings:
-    webhook_id:
+  environment:
+    DISCORD_WEBHOOK_ID:
       from_secret: discord_webhook_id
-    webhook_token:
+    DISCORD_WEBHOOK_TOKEN:
       from_secret: discord_webhook_token
   when:
-  status:
-  - success
-  - failure
+    status:
+    - success
+    - failure
 
 depends_on:
 - testing

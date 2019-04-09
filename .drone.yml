@@ -6,7 +6,7 @@ clone:
 
 steps:
 - name: testing
-  image: golang:1.11
+  image: golang:1.12
   pull: true
   environment:
     GO111MODULE: on
@@ -34,7 +34,7 @@ clone:
 
 steps:
 - name: testing
-  image: golang:1.11
+  image: golang:1.12
   pull: true
   environment:
     GO111MODULE: on

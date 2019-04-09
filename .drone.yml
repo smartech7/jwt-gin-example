@@ -25,10 +25,6 @@ trigger:
 kind: pipeline
 name: testing
 
-workspace:
-  base: /go
-  path: src/github.com/appleboy/gin-jwt
-
 clone:
   depth: 50
 

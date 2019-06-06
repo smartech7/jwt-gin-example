@@ -17,13 +17,13 @@ It uses [jwt-go](https://github.com/dgrijalva/jwt-go) to provide a jwt authentic
 Download and install it:
 
 ```sh
-$ go get github.com/appleboy/gin-jwt
+$ go get github.com/appleboy/gin-jwt/v2
 ```
 
 Import it in your code:
 
 ```go
-import "github.com/appleboy/gin-jwt"
+import "github.com/appleboy/gin-jwt/v2"
 ```
 
 ## Example
@@ -40,7 +40,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/appleboy/gin-jwt"
+	"github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
 

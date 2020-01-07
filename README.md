@@ -41,9 +41,9 @@ import "github.com/appleboy/gin-jwt"
 
 ## Example
 
-Please see [the example file](example/basic/server.go) and you can use `ExtractClaims` to fetch user data.
+Please see [the example file](_example/basic/server.go) and you can use `ExtractClaims` to fetch user data.
 
-[embedmd]:# (example/basic/server.go go)
+[embedmd]:# (_example/basic/server.go go)
 ```go
 package main
 
@@ -190,10 +190,10 @@ func main() {
 
 ## Demo
 
-Please run example/server.go file and listen `8000` port.
+Please run _example/server.go file and listen `8000` port.
 
 ```sh
-go run example/server.go
+go run _example/server.go
 ```
 
 Download and install [httpie](https://github.com/jkbrzt/httpie) CLI HTTP client.

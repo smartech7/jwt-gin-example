@@ -2,7 +2,7 @@ kind: pipeline
 name: lint
 
 clone:
-  depth: 50
+  depth: 1
 
 steps:
 - name: testing
@@ -24,7 +24,7 @@ kind: pipeline
 name: testing
 
 clone:
-  depth: 50
+  depth: 1
 
 steps:
 - name: testing

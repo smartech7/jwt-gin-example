@@ -106,6 +106,9 @@ type GinJWTMiddleware struct {
 
 	// Public key file for asymmetric algorithms
 	PubKeyFile string
+	
+	// Private key passphrase
+	PrivateKeyPassphrase string
 
 	// Public key bytes for asymmetric algorithms.
 	//
@@ -240,6 +243,16 @@ func (mw *GinJWTMiddleware) privateKey() error {
 		}
 		keyData = filecontent
 	}
+	
+	if mw.PrivateKeyPassphrase != "" {
+		key, err := jwt.ParseRSAPrivateKeyFromPEMWithPassword(keyData, mw.PrivateKeyPassphrase)
+		if err != nil {
+			return ErrInvalidPrivKey
+		}
+		mw.privKey = key
+		return nil
+	}
+
 
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(keyData)
 	if err != nil {

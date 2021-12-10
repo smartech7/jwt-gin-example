@@ -23,9 +23,5 @@ _testmain.go
 *.test
 *.prof
 .DS_Store
-gin-bin
-.cover
 .vscode
-coverage.txt
-vendor/*
-!vendor/vendor.json
+coverage.out

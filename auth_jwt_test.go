@@ -288,6 +288,7 @@ func TestLoginHandler(t *testing.T) {
 
 			assert.Equal(t, ErrMissingLoginValues.Error(), message.String())
 			assert.Equal(t, http.StatusUnauthorized, r.Code)
+			//nolint:staticcheck
 			assert.Equal(t, "application/json; charset=utf-8", r.HeaderMap.Get("Content-Type"))
 		})
 
@@ -311,7 +312,9 @@ func TestLoginHandler(t *testing.T) {
 			message := gjson.Get(r.Body.String(), "message")
 			assert.Equal(t, "login successfully", message.String())
 			assert.Equal(t, http.StatusOK, r.Code)
+			//nolint:staticcheck
 			assert.True(t, strings.HasPrefix(r.HeaderMap.Get("Set-Cookie"), "jwt="))
+			//nolint:staticcheck
 			assert.True(t, strings.HasSuffix(r.HeaderMap.Get("Set-Cookie"), "; Path=/; Domain=example.com; Max-Age=3600"))
 		})
 }
@@ -1108,6 +1111,7 @@ func TestSendAuthorizationBool(t *testing.T) {
 			"Authorization": "Bearer " + makeTokenString("HS256", "admin"),
 		}).
 		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+			//nolint:staticcheck
 			token := r.HeaderMap.Get("Authorization")
 			assert.Equal(t, "Bearer "+makeTokenString("HS256", "admin"), token)
 			assert.Equal(t, http.StatusOK, r.Code)
@@ -1288,6 +1292,7 @@ func TestLogout(t *testing.T) {
 	r.POST("/logout").
 		Run(handler, func(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 			assert.Equal(t, http.StatusOK, r.Code)
+			//nolint:staticcheck
 			assert.Equal(t, fmt.Sprintf("%s=; Path=/; Domain=%s; Max-Age=0", cookieName, cookieDomain), r.HeaderMap.Get("Set-Cookie"))
 		})
 }

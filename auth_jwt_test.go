@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
@@ -71,7 +70,6 @@ func keyFunc(token *jwt.Token) (interface{}, error) {
 }
 
 func TestMissingKey(t *testing.T) {
-
 	_, err := New(&GinJWTMiddleware{
 		Realm:         "test zone",
 		Timeout:       time.Hour,
@@ -204,7 +202,6 @@ func ginHandler(auth *GinJWTMiddleware) *gin.Engine {
 }
 
 func TestMissingAuthenticatorForLoginHandler(t *testing.T) {
-
 	authMiddleware, err := New(&GinJWTMiddleware{
 		Realm:      "test zone",
 		Key:        key,
@@ -231,7 +228,6 @@ func TestMissingAuthenticatorForLoginHandler(t *testing.T) {
 }
 
 func TestLoginHandler(t *testing.T) {
-
 	// the middleware to test
 	cookieName := "jwt"
 	cookieDomain := "example.com"
@@ -318,19 +314,6 @@ func TestLoginHandler(t *testing.T) {
 			assert.True(t, strings.HasPrefix(r.HeaderMap.Get("Set-Cookie"), "jwt="))
 			assert.True(t, strings.HasSuffix(r.HeaderMap.Get("Set-Cookie"), "; Path=/; Domain=example.com; Max-Age=3600"))
 		})
-}
-
-func performRequest(r http.Handler, method, path string, token string) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest(method, path, nil)
-
-	if token != "" {
-		req.Header.Set("Authorization", token)
-	}
-
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-
-	return w
 }
 
 func TestParseToken(t *testing.T) {
@@ -805,7 +788,6 @@ func ConvertClaims(claims MapClaims) map[string]interface{} {
 }
 
 func TestEmptyClaims(t *testing.T) {
-
 	var jwtClaims MapClaims
 
 	// the middleware to test
@@ -1069,9 +1051,9 @@ func TestDefineTokenHeadName(t *testing.T) {
 }
 
 func TestHTTPStatusMessageFunc(t *testing.T) {
-	var successError = errors.New("Successful test error")
-	var failedError = errors.New("Failed test error")
-	var successMessage = "Overwrite error message."
+	successError := errors.New("Successful test error")
+	failedError := errors.New("Failed test error")
+	successMessage := "Overwrite error message."
 
 	authMiddleware, _ := New(&GinJWTMiddleware{
 		Key:           key,

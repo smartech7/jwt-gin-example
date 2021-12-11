@@ -249,6 +249,7 @@ func (mw *GinJWTMiddleware) privateKey() error {
 	}
 
 	if mw.PrivateKeyPassphrase != "" {
+		//nolint:staticcheck
 		key, err := jwt.ParseRSAPrivateKeyFromPEMWithPassword(keyData, mw.PrivateKeyPassphrase)
 		if err != nil {
 			return ErrInvalidPrivKey
@@ -295,7 +296,6 @@ func (mw *GinJWTMiddleware) usingPublicKeyAlgo() bool {
 
 // MiddlewareInit initialize jwt configs.
 func (mw *GinJWTMiddleware) MiddlewareInit() error {
-
 	if mw.TokenLookup == "" {
 		mw.TokenLookup = "header:Authorization"
 	}
@@ -451,7 +451,6 @@ func (mw *GinJWTMiddleware) middlewareImpl(c *gin.Context) {
 // GetClaimsFromJWT get claims from JWT token
 func (mw *GinJWTMiddleware) GetClaimsFromJWT(c *gin.Context) (MapClaims, error) {
 	token, err := mw.ParseToken(c)
-
 	if err != nil {
 		return nil, err
 	}
@@ -480,7 +479,6 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 	}
 
 	data, err := mw.Authenticator(c)
-
 	if err != nil {
 		mw.unauthorized(c, http.StatusUnauthorized, mw.HTTPStatusMessageFunc(err, c))
 		return
@@ -500,7 +498,6 @@ func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
 	claims["exp"] = expire.Unix()
 	claims["orig_iat"] = mw.TimeFunc().Unix()
 	tokenString, err := mw.signedString(token)
-
 	if err != nil {
 		mw.unauthorized(c, http.StatusUnauthorized, mw.HTTPStatusMessageFunc(ErrFailedTokenCreation, c))
 		return
@@ -594,7 +591,6 @@ func (mw *GinJWTMiddleware) RefreshToken(c *gin.Context) (string, time.Time, err
 	newClaims["exp"] = expire.Unix()
 	newClaims["orig_iat"] = mw.TimeFunc().Unix()
 	tokenString, err := mw.signedString(newToken)
-
 	if err != nil {
 		return "", time.Now(), err
 	}
@@ -625,7 +621,6 @@ func (mw *GinJWTMiddleware) RefreshToken(c *gin.Context) (string, time.Time, err
 // CheckIfTokenExpire check if token expire
 func (mw *GinJWTMiddleware) CheckIfTokenExpire(c *gin.Context) (jwt.MapClaims, error) {
 	token, err := mw.ParseToken(c)
-
 	if err != nil {
 		// If we receive an error, and the error is anything other than a single
 		// ValidationErrorExpired, we want to return the error.
@@ -766,7 +761,6 @@ func (mw *GinJWTMiddleware) ParseToken(c *gin.Context) (*jwt.Token, error) {
 
 // ParseTokenString parse jwt token string
 func (mw *GinJWTMiddleware) ParseTokenString(token string) (*jwt.Token, error) {
-
 	if mw.KeyFunc != nil {
 		return jwt.Parse(token, mw.KeyFunc)
 	}

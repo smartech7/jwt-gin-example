@@ -200,10 +200,10 @@ func main() {
 
 ## Demo
 
-Please run _example/server.go file and listen `8000` port.
+Please run _example/basic/server.go file and listen `8000` port.
 
 ```sh
-go run _example/server.go
+go run _example/basic/server.go
 ```
 
 Download and install [httpie](https://github.com/jkbrzt/httpie) CLI HTTP client.
@@ -312,7 +312,7 @@ Use these options for setting the JWT in a cookie. See the Mozilla [documentatio
 
 2. OPTIONAL: `IdentityHandler`
 
-  The default of this function is likely sufficient for your needs. The purpose of this function is to fetch the user identity from claims embedded within the jwt token, and pass this identity value to `Authorizator`. This function assummes [`IdentityKey`: some_user_identity] is one of the attributes embedded within the claims of the jwt token (determined by `PayloadFunc`).
+  The default of this function is likely sufficient for your needs. The purpose of this function is to fetch the user identity from claims embedded within the jwt token, and pass this identity value to `Authorizator`. This function assumes [`IdentityKey`: some_user_identity] is one of the attributes embedded within the claims of the jwt token (determined by `PayloadFunc`).
 
 3. OPTIONAL: `Authorizator`
 

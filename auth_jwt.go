@@ -3,8 +3,8 @@ package jwt
 import (
 	"crypto/rsa"
 	"errors"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -151,6 +151,9 @@ type GinJWTMiddleware struct {
 
 	// CookieSameSite allow use http.SameSite cookie param
 	CookieSameSite http.SameSite
+
+	// ParseOptions allow to modify jwt's parser methods
+	ParseOptions []jwt.ParserOption
 }
 
 var (
@@ -229,7 +232,7 @@ func (mw *GinJWTMiddleware) readKeys() error {
 	if err != nil {
 		return err
 	}
-	jwt.WithoutClaimsValidation()
+
 	err = mw.publicKey()
 	if err != nil {
 		return err
@@ -242,7 +245,7 @@ func (mw *GinJWTMiddleware) privateKey() error {
 	if mw.PrivKeyFile == "" {
 		keyData = mw.PrivKeyBytes
 	} else {
-		filecontent, err := ioutil.ReadFile(mw.PrivKeyFile)
+		filecontent, err := os.ReadFile(mw.PrivKeyFile)
 		if err != nil {
 			return ErrNoPrivKeyFile
 		}
@@ -256,7 +259,6 @@ func (mw *GinJWTMiddleware) privateKey() error {
 			return ErrInvalidPrivKey
 		}
 		mw.privKey = key
-		jwt.WithJSONNumber()
 		return nil
 	}
 
@@ -273,7 +275,7 @@ func (mw *GinJWTMiddleware) publicKey() error {
 	if mw.PubKeyFile == "" {
 		keyData = mw.PubKeyBytes
 	} else {
-		filecontent, err := ioutil.ReadFile(mw.PubKeyFile)
+		filecontent, err := os.ReadFile(mw.PubKeyFile)
 		if err != nil {
 			return ErrNoPubKeyFile
 		}
@@ -755,7 +757,7 @@ func (mw *GinJWTMiddleware) ParseToken(c *gin.Context) (*jwt.Token, error) {
 	}
 
 	if mw.KeyFunc != nil {
-		return jwt.Parse(token, mw.KeyFunc)
+		return jwt.Parse(token, mw.KeyFunc, mw.ParseOptions...)
 	}
 
 	return jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
@@ -770,13 +772,13 @@ func (mw *GinJWTMiddleware) ParseToken(c *gin.Context) (*jwt.Token, error) {
 		c.Set("JWT_TOKEN", token)
 
 		return mw.Key, nil
-	})
+	}, mw.ParseOptions...)
 }
 
 // ParseTokenString parse jwt token string
 func (mw *GinJWTMiddleware) ParseTokenString(token string) (*jwt.Token, error) {
 	if mw.KeyFunc != nil {
-		return jwt.Parse(token, mw.KeyFunc)
+		return jwt.Parse(token, mw.KeyFunc, mw.ParseOptions...)
 	}
 
 	return jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
@@ -788,7 +790,7 @@ func (mw *GinJWTMiddleware) ParseTokenString(token string) (*jwt.Token, error) {
 		}
 
 		return mw.Key, nil
-	})
+	}, mw.ParseOptions...)
 }
 
 func (mw *GinJWTMiddleware) unauthorized(c *gin.Context, code int, message string) {

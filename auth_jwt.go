@@ -229,6 +229,7 @@ func (mw *GinJWTMiddleware) readKeys() error {
 	if err != nil {
 		return err
 	}
+	jwt.WithoutClaimsValidation()
 	err = mw.publicKey()
 	if err != nil {
 		return err
@@ -255,6 +256,7 @@ func (mw *GinJWTMiddleware) privateKey() error {
 			return ErrInvalidPrivKey
 		}
 		mw.privKey = key
+		jwt.WithJSONNumber()
 		return nil
 	}
 
